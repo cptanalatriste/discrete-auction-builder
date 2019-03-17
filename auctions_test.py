@@ -1,6 +1,5 @@
 import unittest
 
-import gamebuilder
 from auctions import FirstPriceAuction
 
 

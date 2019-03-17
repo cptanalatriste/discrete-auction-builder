@@ -11,8 +11,13 @@ class PlayerSpecification(object):
         self.player_types = player_types
         self.player_actions = player_actions
 
+        self.pure_strategies = self.initialize_pure_strategies()
+
+    def initialize_pure_strategies(self):
+        return [strategy for strategy in itertools.product(self.player_actions, repeat=len(self.player_types))]
+
     def get_pure_strategies(self):
-        return itertools.product(self.player_actions, repeat=len(self.player_types))
+        return self.pure_strategies
 
     def get_strategy_description(self, strategy):
         strategy_description = ""

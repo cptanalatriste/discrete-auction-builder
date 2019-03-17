@@ -1,5 +1,22 @@
+import itertools
+
 import gamebuilder
 from gamebuilder import BayesianGame, PlayerSpecification
+
+
+class AuctionPlayerSpecification(PlayerSpecification):
+
+    def __init__(self, player_valuations):
+        super(AuctionPlayerSpecification, self).__init__(player_types=player_valuations,
+                                                         player_actions=player_valuations)
+
+    def initialize_pure_strategies(self):
+        pure_strategies = []
+
+        for valuation in self.player_types:
+            pure_strategies.append([float(bid) for bid in range(0, int(valuation) + 1)])
+
+        return [strategy for strategy in itertools.product(*pure_strategies)]
 
 
 class FirstPriceAuction(BayesianGame):
@@ -7,9 +24,8 @@ class FirstPriceAuction(BayesianGame):
     def __init__(self, game_name, player_valuations, opponent_valuations):
         super(FirstPriceAuction, self).__init__(
             game_name=game_name,
-            player_specification=PlayerSpecification(player_types=player_valuations, player_actions=player_valuations),
-            opponent_specification=PlayerSpecification(player_types=opponent_valuations,
-                                                       player_actions=opponent_valuations))
+            player_specification=AuctionPlayerSpecification(player_valuations=player_valuations),
+            opponent_specification=AuctionPlayerSpecification(player_valuations=opponent_valuations))
 
     def get_types_probability(self, player_type, opponent_type):
         return 1.0 / (len(self.player_specification.player_types) * len(self.opponent_specification.player_types))
