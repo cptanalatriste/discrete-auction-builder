@@ -11,7 +11,7 @@ class SampleGame(BayesianGame):
 
     def __init__(self):
         super(SampleGame, self).__init__(
-            game_name= "Sample_Game",
+            game_name="Sample_Game",
             player_specification=PlayerSpecification(player_types=[1, 2], player_actions=["U", "D"]),
             opponent_specification=PlayerSpecification(player_types=[1, 2],
                                                        player_actions=["R",
@@ -43,19 +43,19 @@ class SampleGame(BayesianGame):
         return self.type_probability[(player_type, opponent_type)]
 
     def get_utility(self, player_type, player_strategy, opponent_type, opponent_strategy):
-        player_index = player_type - 1
-        player_action = player_strategy[player_index]
+        player_type_index = self.player_specification.get_type_index(player_type)
+        player_action = player_strategy[player_type_index]
 
-        opponent_index = opponent_type - 1
-        opponent_action = opponent_strategy[opponent_index]
+        opponent_type_index = self.opponent_specification.get_type_index(opponent_type)
+        opponent_action = opponent_strategy[opponent_type_index]
 
         return self.utility_values[(player_type, player_action, opponent_type, opponent_action)]
 
 
-class PlayerSpecificationTest(unittest.TestCase):
+class BayesianGameTest(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
-        super(PlayerSpecificationTest, self).__init__(*args, **kwargs)
+        super(BayesianGameTest, self).__init__(*args, **kwargs)
         self.sample_game = SampleGame()
 
     def test_pure_strategies(self):
@@ -79,7 +79,6 @@ class PlayerSpecificationTest(unittest.TestCase):
 
     def test_get_game_file(self):
         self.sample_game.get_strategic_game_format()
-
 
 
 def get_all_strategies(player_specification):
