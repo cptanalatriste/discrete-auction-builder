@@ -1,7 +1,10 @@
 import itertools
+import logging
 
 import gamebuilder
 from gamebuilder import BayesianGame, PlayerSpecification
+
+logging.basicConfig(level=logging.INFO)
 
 
 class AuctionPlayerSpecification(PlayerSpecification):
@@ -46,15 +49,19 @@ class FirstPriceAuction(BayesianGame):
 
 
 if __name__ == "__main__":
-    sample_auction = FirstPriceAuction(game_name="toy_auction", player_valuations=[0.0, 1.0, 2.0],
-                                       opponent_valuations=[0.0, 1.0])
+    player_valuations = range(0, 2 + 1)
+    opponent_valuations = range(0, 1 + 1)
+    game_name = "toy_auction"
+
+    sample_auction = FirstPriceAuction(game_name=game_name, player_valuations=player_valuations,
+                                       opponent_valuations=opponent_valuations)
 
     nfg_file = sample_auction.get_strategic_game_format()
-    print("Gambit file generated at " + nfg_file)
+    logging.info("Gambit file generated at " + nfg_file)
 
     gambit_process = "C:\Program Files (x86)\Gambit\gambit-enumpure.exe"
     strategies_catalogues = sample_auction.get_strategy_catalogues()
 
-    print("Starting equilibrium calculation using: " + gambit_process)
+    logging.info("Starting equilibrium calculation using: " + gambit_process)
     gamebuilder.calculate_equilibrium(gambit_process=gambit_process, gambit_file=nfg_file,
                                       strategy_catalogues=strategies_catalogues)

@@ -3,6 +3,7 @@ import subprocess
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from string import Template
+import logging
 
 
 class PlayerSpecification(object):
@@ -74,6 +75,10 @@ class BayesianGame(ABC):
     def get_strategic_game_format(self):
         player_strategies = [strategy for strategy in self.player_specification.get_pure_strategies()]
         opponent_strategies = [strategy for strategy in self.opponent_specification.get_pure_strategies()]
+
+        logging.info(
+            "Pure strategies for player 1: " + str(len(player_strategies)) + " .Pure strategies for player 2: " + str(
+                len(opponent_strategies)))
 
         profile_payoffs = []
 
@@ -162,7 +167,7 @@ def calculate_equilibrium(gambit_process, strategy_catalogues, gambit_file):
     equilibrium_list = []
     for index, nash_equilibrium in enumerate(nash_equilibrium_strings):
 
-        print("Equilibrium " + str(index + 1) + " of " + str(len(nash_equilibrium_strings)))
+        logging.info("Equilibrium " + str(index + 1) + " of " + str(len(nash_equilibrium_strings)))
 
         nash_equilibrium = nash_equilibrium.strip()
         nash_equilibrium = nash_equilibrium[start_index:].split(",")
@@ -177,8 +182,9 @@ def calculate_equilibrium(gambit_process, strategy_catalogues, gambit_file):
             strategy_name = strategies_catalog[strategy_index]
 
             if float(probability) > 0.0:
-                print("Player " + str(player_index) + "-> Strategy: " + str(strategy_name) + " \t\tProbability " + str(
-                    probability))
+                logging.info(
+                    "Player " + str(player_index) + "-> Strategy: " + str(strategy_name) + " \t\tProbability " + str(
+                        probability))
 
             equilibrium_profile[player_index][strategy_name] = probability
 
