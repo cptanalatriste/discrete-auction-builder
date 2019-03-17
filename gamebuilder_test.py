@@ -5,9 +5,13 @@ from gamebuilder import BayesianGame
 
 
 class SampleGame(BayesianGame):
+    """
+    This is the sample bayesian game contained in Chapter 7 of Essentials of Game Theory by Leyton-Brown.
+    """
 
     def __init__(self):
         super(SampleGame, self).__init__(
+            game_name= "Sample_Game",
             player_specification=PlayerSpecification(player_types=[1, 2], player_actions=["U", "D"]),
             opponent_specification=PlayerSpecification(player_types=[1, 2],
                                                        player_actions=["R",
@@ -72,6 +76,10 @@ class PlayerSpecificationTest(unittest.TestCase):
             (player_strategy, opponent_strategy))
 
         self.assertAlmostEqual(actual_opponent_utility, expected_opponent_utility)
+
+    def test_get_game_file(self):
+        self.sample_game.get_strategic_game_format()
+
 
 
 def get_all_strategies(player_specification):
