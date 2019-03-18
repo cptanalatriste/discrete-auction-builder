@@ -15,7 +15,7 @@ class PlayerSpecification(object):
         self.pure_strategies = self.initialize_pure_strategies()
 
     def initialize_pure_strategies(self):
-        return [strategy for strategy in itertools.product(self.player_actions, repeat=len(self.player_types))]
+        return {strategy for strategy in itertools.product(self.player_actions, repeat=len(self.player_types))}
 
     def get_pure_strategies(self):
         return self.pure_strategies
@@ -47,7 +47,7 @@ class BayesianGame(ABC):
         types_iterator = itertools.product(self.player_specification.player_types,
                                            self.opponent_specification.player_types)
 
-        expected_player_utility, expected_opponent_utility = 0.0, 0.0
+        expected_player_utility, expected_opponent_utility = 0, 0
         for player_type, opponent_type in types_iterator:
             probability = self.get_types_probability(player_type, opponent_type)
             player_utility, opponent_utility = self.get_utility(player_type, player_strategy, opponent_type,
