@@ -79,11 +79,14 @@ class BayesianGame(ABC):
         opponent_strategies = self.opponent_specification.get_pure_strategies()
 
         logging.info(
-            "Pure strategies for player 1: " + str(len(player_strategies)) + " .Pure strategies for player 2: " + str(
+            "Pure strategies for player 1: " + str(len(player_strategies)) + " . Pure strategies for player 2: " + str(
                 len(opponent_strategies)))
 
         profile_payoffs = []
 
+        logging.info(
+            "Calculating payoffs for " + str(
+                len(player_strategies) * len(opponent_strategies)) + " strategy profiles...")
         for opponent_strategy, player_strategy in itertools.product(opponent_strategies, player_strategies):
             payoffs = self.get_expected_utilities((player_strategy, opponent_strategy))
             profile_name = "P1_" + self.player_specification.get_strategy_description(

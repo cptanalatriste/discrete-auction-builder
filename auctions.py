@@ -1,6 +1,7 @@
 import itertools
 import logging
 from fractions import Fraction
+import time
 
 from gamebuilder import BayesianGame, PlayerSpecification
 
@@ -16,10 +17,25 @@ class AuctionPlayerSpecification(PlayerSpecification):
     def initialize_pure_strategies(self):
         pure_strategies = []
 
-        for valuation in self.player_types:
-            pure_strategies.append([bid for bid in range(0, int(valuation) + 1)])
+        logging.info("Generating strategies for " + str(len(self.player_types)) + " valuations ...")
 
-        return [strategy for strategy in itertools.product(*pure_strategies)]
+        for valuation in self.player_types:
+            pure_strategies.append([bid for bid in self.player_actions if bid <= valuation])
+
+        return [strategy for strategy in
+                itertools.filterfalse(lambda s: not self.is_valid_strategy(s),
+                                      itertools.product(*pure_strategies))]
+
+    @staticmethod
+    def is_valid_strategy(strategy):
+        for index, current_bid in enumerate(strategy):
+            if index > 0:
+                previous_bid = strategy[index - 1]
+
+                if previous_bid > current_bid:
+                    return False
+
+        return True
 
 
 class FirstPriceAuction(BayesianGame):
@@ -49,11 +65,20 @@ class FirstPriceAuction(BayesianGame):
 
 
 if __name__ == "__main__":
-    player_valuations = range(0, 2 + 1)
-    opponent_valuations = range(0, 1 + 1)
-    game_name = "toy_auction"
+    # player_valuations = range(50, 200 + 1)
+    # opponent_valuations = range(50, 150 + 1)
 
+    # player_valuations = range(50, 59)
+    # opponent_valuations = range(50, 56)
+
+    player_valuations = range(50, 56)
+    opponent_valuations = range(50, 54)
+    game_name = str(len(player_valuations)) + "_strong_" + str(len(opponent_valuations)) + "_weak_auction"
+
+    start_time = time.time()
     sample_auction = FirstPriceAuction(game_name=game_name, player_valuations=player_valuations,
                                        opponent_valuations=opponent_valuations)
 
     sample_auction.calculate_equilibria()
+
+    logging.info("--- %s seconds ---" % (time.time() - start_time))
