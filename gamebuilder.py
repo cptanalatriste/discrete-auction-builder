@@ -73,8 +73,8 @@ class BayesianGame(ABC):
         return strategies_catalogues
 
     def get_strategic_game_format(self):
-        player_strategies = [strategy for strategy in self.player_specification.get_pure_strategies()]
-        opponent_strategies = [strategy for strategy in self.opponent_specification.get_pure_strategies()]
+        player_strategies = self.player_specification.get_pure_strategies()
+        opponent_strategies = self.opponent_specification.get_pure_strategies()
 
         logging.info(
             "Pure strategies for player 1: " + str(len(player_strategies)) + " .Pure strategies for player 2: " + str(
