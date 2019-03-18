@@ -59,12 +59,12 @@ class BayesianGameTest(unittest.TestCase):
         self.sample_game = SampleGame()
 
     def test_pure_strategies(self):
-        expected_strategies = {("U", "U"), ("U", "D"), ("D", "U"), ("D", "D")}
+        expected_strategies = [("U", "U"), ("U", "D"), ("D", "U"), ("D", "D")]
         actual_strategies = self.sample_game.player_specification.get_pure_strategies()
 
         self.assertEqual(actual_strategies, expected_strategies)
 
-        expected_strategies = {("R", "R"), ("R", "L"), ("L", "R"), ("L", "L")}
+        expected_strategies = [("R", "R"), ("R", "L"), ("L", "R"), ("L", "L")]
         actual_strategies = self.sample_game.opponent_specification.get_pure_strategies()
         self.assertEqual(actual_strategies, expected_strategies)
 

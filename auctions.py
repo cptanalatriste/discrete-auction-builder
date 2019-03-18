@@ -2,7 +2,6 @@ import itertools
 import logging
 from fractions import Fraction
 
-import gamebuilder
 from gamebuilder import BayesianGame, PlayerSpecification
 
 logging.basicConfig(level=logging.INFO)
@@ -20,7 +19,7 @@ class AuctionPlayerSpecification(PlayerSpecification):
         for valuation in self.player_types:
             pure_strategies.append([bid for bid in range(0, int(valuation) + 1)])
 
-        return {strategy for strategy in itertools.product(*pure_strategies)}
+        return [strategy for strategy in itertools.product(*pure_strategies)]
 
 
 class FirstPriceAuction(BayesianGame):
@@ -57,12 +56,4 @@ if __name__ == "__main__":
     sample_auction = FirstPriceAuction(game_name=game_name, player_valuations=player_valuations,
                                        opponent_valuations=opponent_valuations)
 
-    nfg_file = sample_auction.get_strategic_game_format()
-    logging.info("Gambit file generated at " + nfg_file)
-
-    gambit_process = "C:\Program Files (x86)\Gambit\gambit-enumpure.exe"
-    strategies_catalogues = sample_auction.get_strategy_catalogues()
-
-    logging.info("Starting equilibrium calculation using: " + gambit_process)
-    gamebuilder.calculate_equilibrium(gambit_process=gambit_process, gambit_file=nfg_file,
-                                      strategy_catalogues=strategies_catalogues)
+    sample_auction.calculate_equilibria()
