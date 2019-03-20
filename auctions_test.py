@@ -13,11 +13,11 @@ class FirstPriceAuctionTest(unittest.TestCase):
 
     def test_pure_strategies(self):
         expected_strategies = [(50, 50, 50), (50, 50, 51), (50, 50, 52), (50, 51, 51), (50, 51, 52)]
-        actual_strategies = self.sample_auction.player_specification.get_pure_strategies()
+        actual_strategies = list(self.sample_auction.player_specification.get_pure_strategies())
         self.assertEqual(actual_strategies, expected_strategies)
 
         expected_strategies = [(50, 50), (50, 51)]
-        actual_strategies = self.sample_auction.opponent_specification.get_pure_strategies()
+        actual_strategies = list(self.sample_auction.opponent_specification.get_pure_strategies())
         self.assertEqual(actual_strategies, expected_strategies)
 
     def test_auction_utilities(self):

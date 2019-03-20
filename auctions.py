@@ -17,14 +17,11 @@ class AuctionPlayerSpecification(PlayerSpecification):
     def initialize_pure_strategies(self):
         pure_strategies = []
 
-        logging.info("Generating strategies for " + str(len(self.player_types)) + " valuations ...")
-
         for valuation in self.player_types:
             pure_strategies.append([bid for bid in self.player_actions if bid <= valuation])
 
-        return [strategy for strategy in
-                itertools.filterfalse(lambda s: not self.is_valid_strategy(s),
-                                      itertools.product(*pure_strategies))]
+        return itertools.filterfalse(lambda s: not self.is_valid_strategy(s),
+                                     itertools.product(*pure_strategies))
 
     @staticmethod
     def is_valid_strategy(strategy):
@@ -68,11 +65,15 @@ if __name__ == "__main__":
     # player_valuations = range(50, 200 + 1)
     # opponent_valuations = range(50, 150 + 1)
 
-    # player_valuations = range(50, 59)
-    # opponent_valuations = range(50, 56)
+    player_valuations = range(50, 62)
+    opponent_valuations = range(50, 58)
 
-    player_valuations = range(50, 56)
-    opponent_valuations = range(50, 54)
+    # player_valuations = range(50, 56)
+    # opponent_valuations = range(50, 54)
+
+    # player_valuations = range(50, 53)
+    # opponent_valuations = range(50, 52)
+
     game_name = str(len(player_valuations)) + "_strong_" + str(len(opponent_valuations)) + "_weak_auction"
 
     start_time = time.time()

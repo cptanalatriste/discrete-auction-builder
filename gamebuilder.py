@@ -12,9 +12,11 @@ class PlayerSpecification(object):
         self.player_actions = player_actions
 
         self.pure_strategies = self.initialize_pure_strategies()
+        self.strategy_catalogue = []
+        self.strategy_descriptions = []
 
     def initialize_pure_strategies(self):
-        return [strategy for strategy in itertools.product(self.player_actions, repeat=len(self.player_types))]
+        return itertools.product(self.player_actions, repeat=len(self.player_types))
 
     def get_pure_strategies(self):
         return self.pure_strategies
@@ -30,10 +32,15 @@ class PlayerSpecification(object):
         return self.player_types.index(player_type)
 
     def get_strategy_index(self, player_strategy):
-        return self.pure_strategies.index(player_strategy)
+        return self.strategy_catalogue.index(player_strategy)
+
+    def add_to_strategy_catalogue(self, player_strategy, strategy_description):
+        if player_strategy not in self.strategy_catalogue:
+            self.strategy_catalogue.append(player_strategy)
+            self.strategy_descriptions.append(strategy_description)
 
     def get_strategy_catalogue(self):
-        return [self.get_strategy_description(strategy) for strategy in self.get_pure_strategies()]
+        return self.strategy_descriptions
 
 
 class BayesianGame(ABC):
@@ -74,30 +81,35 @@ class BayesianGame(ABC):
 
         return strategies_catalogues
 
+    def register_action_profile(self, player_strategy, player_strategy_desc, opponent_strategy, opponent_strategy_desc):
+        self.player_specification.add_to_strategy_catalogue(player_strategy, player_strategy_desc)
+        self.opponent_specification.add_to_strategy_catalogue(opponent_strategy, opponent_strategy_desc)
+
     def get_strategic_game_format(self):
         player_strategies = self.player_specification.get_pure_strategies()
         opponent_strategies = self.opponent_specification.get_pure_strategies()
 
-        logging.info(
-            "Pure strategies for player 1: " + str(len(player_strategies)) + " . Pure strategies for player 2: " + str(
-                len(opponent_strategies)))
-
         profile_payoffs = []
 
-        logging.info(
-            "Calculating payoffs for " + str(
-                len(player_strategies) * len(opponent_strategies)) + " strategy profiles...")
         for opponent_strategy, player_strategy in itertools.product(opponent_strategies, player_strategies):
             payoffs = self.get_expected_utilities((player_strategy, opponent_strategy))
-            profile_name = "P1_" + self.player_specification.get_strategy_description(
-                player_strategy) + "_P2_" + self.opponent_specification.get_strategy_description(opponent_strategy)
 
+            player_strategy_desc = self.player_specification.get_strategy_description(
+                player_strategy)
+            opponent_strategy_desc = self.opponent_specification.get_strategy_description(opponent_strategy)
+            self.register_action_profile(player_strategy, player_strategy_desc, opponent_strategy,
+                                         opponent_strategy_desc)
+
+            profile_name = "P1_" + player_strategy_desc + "_P2_" + opponent_strategy_desc
+
+            logging.info("Profile: " + profile_name + " Payoffs: " + str(payoffs))
             profile_payoffs.append((profile_name, payoffs))
 
         strategies_catalogues = self.get_strategy_catalogues()
         return gambitutils.get_strategic_game_format(self.game_name, strategies_catalogues, profile_payoffs)
 
     def calculate_equilibria(self):
+        logging.info("Starting equilibrium calculation ...")
         nfg_file = self.get_strategic_game_format()
         logging.info("Gambit file generated at " + nfg_file)
 
