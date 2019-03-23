@@ -62,17 +62,17 @@ class FirstPriceAuction(BayesianGame):
 
 
 if __name__ == "__main__":
-    # player_valuations = range(50, 200 + 1)
-    # opponent_valuations = range(50, 150 + 1)
-
-    player_valuations = range(50, 62)
-    opponent_valuations = range(50, 58)
-
-    # player_valuations = range(50, 56)
-    # opponent_valuations = range(50, 54)
-
     # player_valuations = range(50, 53)
     # opponent_valuations = range(50, 52)
+
+    player_valuations = range(50, 56)
+    opponent_valuations = range(50, 54)
+
+    # player_valuations = range(50, 62)
+    # opponent_valuations = range(50, 58)
+
+    # player_valuations = range(50, 200 + 1)
+    # opponent_valuations = range(50, 150 + 1)
 
     game_name = str(len(player_valuations)) + "_strong_" + str(len(opponent_valuations)) + "_weak_auction"
 
