@@ -4,3 +4,4 @@
 *.nfg
 __pycache__/gamebuilder.cpython-36.pyc
 *.log
+*.pyc
