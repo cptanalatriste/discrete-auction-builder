@@ -18,7 +18,7 @@ class Strategy:
         return player_action
 
     def __str__(self):
-        return str(self.player_strategy)
+        return str("Strategy: " + self.player_strategy)
 
     def __repr__(self):
         return str(self)
@@ -55,8 +55,10 @@ class PlayerSpecification(object):
         return self.strategy_catalogue.index(player_strategy)
 
     def add_to_strategy_catalogue(self, player_strategy, strategy_description):
-        if player_strategy not in self.strategy_catalogue:
-            self.strategy_catalogue.append(player_strategy)
+
+        strategy_as_tuple = tuple(player_strategy.player_strategy)
+        if strategy_as_tuple not in self.strategy_catalogue:
+            self.strategy_catalogue.append(strategy_as_tuple)
             self.strategy_descriptions.append(strategy_description)
 
     def get_strategy_catalogue(self):
@@ -120,8 +122,7 @@ class BayesianGame(ABC):
 
             payoffs = self.get_expected_utilities((player_strategy, opponent_strategy))
 
-            player_strategy_desc = self.player_specification.get_strategy_description(
-                player_strategy)
+            player_strategy_desc = self.player_specification.get_strategy_description(player_strategy)
             opponent_strategy_desc = self.opponent_specification.get_strategy_description(opponent_strategy)
             self.register_action_profile(player_strategy, player_strategy_desc, opponent_strategy,
                                          opponent_strategy_desc)
