@@ -1,7 +1,10 @@
 import unittest
 from fractions import Fraction
 
-from auctions import FirstPriceAuction
+import numpy as np
+
+from auctionsnp import FirstPriceAuction
+from gamebuildernp import Strategy
 
 
 class FirstPriceAuctionTest(unittest.TestCase):
@@ -12,19 +15,23 @@ class FirstPriceAuctionTest(unittest.TestCase):
                                                 opponent_valuations=[50, 51])
 
     def test_pure_strategies(self):
-        expected_strategies = [(50, 50, 50), (50, 50, 51), (50, 50, 52), (50, 51, 51), (50, 51, 52)]
-        actual_strategies = list(self.sample_auction.player_specification.get_pure_strategies())
-        self.assertEqual(actual_strategies, expected_strategies)
+        expected_strategies = np.array([[50, 50, 50], [50, 50, 51], [50, 51, 51], [50, 50, 52], [50, 51, 52]])
+        actual_strategies = self.sample_auction.player_specification.get_pure_strategies()
+        self.assertTrue(np.array_equal(actual_strategies, expected_strategies),
+                        "expected: " + str(expected_strategies) +
+                        " actual: " + str(actual_strategies))
 
-        expected_strategies = [(50, 50), (50, 51)]
-        actual_strategies = list(self.sample_auction.opponent_specification.get_pure_strategies())
-        self.assertEqual(actual_strategies, expected_strategies)
+        expected_strategies = np.array([[50, 50], [50, 51]])
+        actual_strategies = self.sample_auction.opponent_specification.get_pure_strategies()
+        self.assertTrue(np.array_equal(actual_strategies, expected_strategies),
+                        "expected: " + str(expected_strategies) +
+                        " actual: " + str(actual_strategies))
 
     def test_auction_utilities(self):
         expected_strong_utility = Fraction(1, 2)
         expected_weak_utility = Fraction(1, 4)
-        strong_bidder_strategy = (50, 50, 50)
-        weak_bidder_strategy = (50, 50)
+        strong_bidder_strategy = Strategy((50, 50, 50), self.sample_auction.player_specification)
+        weak_bidder_strategy = Strategy((50, 50), self.sample_auction.opponent_specification)
 
         actual_strong_utility, actual_weak_utility = self.sample_auction.get_expected_utilities(
             (strong_bidder_strategy, weak_bidder_strategy))
@@ -34,8 +41,8 @@ class FirstPriceAuctionTest(unittest.TestCase):
 
         expected_strong_utility = Fraction(1 / 12)
         expected_weak_utility = 0
-        strong_bidder_strategy = (50, 50, 52)
-        weak_bidder_strategy = (50, 51)
+        strong_bidder_strategy = Strategy((50, 50, 52), self.sample_auction.player_specification)
+        weak_bidder_strategy = Strategy((50, 51), self.sample_auction.opponent_specification)
 
         actual_strong_utility, actual_weak_utility = self.sample_auction.get_expected_utilities(
             (strong_bidder_strategy, weak_bidder_strategy))

@@ -1,9 +1,10 @@
-import itertools
 import logging
 from fractions import Fraction
 import time
+import numpy as np
 
-from gamebuilder import BayesianGame, PlayerSpecification
+import gamebuildernp
+from gamebuildernp import BayesianGame, PlayerSpecification
 
 logging.basicConfig(level=logging.INFO)
 
@@ -20,8 +21,9 @@ class AuctionPlayerSpecification(PlayerSpecification):
         for valuation in self.player_types:
             pure_strategies.append([bid for bid in self.player_actions if bid <= valuation])
 
-        return itertools.filterfalse(lambda s: not self.is_valid_strategy(s),
-                                     itertools.product(*pure_strategies))
+        product = gamebuildernp.get_cartesian_product(*pure_strategies)
+        valid_filter = np.array([self.is_valid_strategy(row) for row in product])
+        return product[valid_filter]
 
     @staticmethod
     def is_valid_strategy(strategy):
@@ -47,11 +49,8 @@ class FirstPriceAuction(BayesianGame):
         return Fraction(1, len(self.player_specification.player_types) * len(self.opponent_specification.player_types))
 
     def get_utility(self, player_type, player_strategy, opponent_type, opponnet_strategy):
-        player_type_index = self.player_specification.get_type_index(player_type)
-        player_bid = player_strategy[player_type_index]
-
-        opponent_type_index = self.opponent_specification.get_type_index(opponent_type)
-        opponent_bid = opponnet_strategy[opponent_type_index]
+        player_bid = player_strategy.get_action_by_type(player_type)
+        opponent_bid = opponnet_strategy.get_action_by_type(opponent_type)
 
         if player_bid > opponent_bid:
             return player_type - player_bid, 0
@@ -62,19 +61,17 @@ class FirstPriceAuction(BayesianGame):
 
 
 if __name__ == "__main__":
-
-
     # player_valuations = range(50, 53)
     # opponent_valuations = range(50, 52)
 
     # player_valuations = range(50, 56)
     # opponent_valuations = range(50, 54)
-    #
-    # player_valuations = range(50, 59)
-    # opponent_valuations = range(50, 56)
 
-    player_valuations = range(50, 62)
-    opponent_valuations = range(50, 58)
+    player_valuations = range(50, 59)
+    opponent_valuations = range(50, 56)
+
+    # player_valuations = range(50, 62)
+    # opponent_valuations = range(50, 58)
 
     # player_valuations = range(50, 200 + 1)
     # opponent_valuations = range(50, 150 + 1)
