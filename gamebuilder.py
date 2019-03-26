@@ -1,6 +1,7 @@
 import itertools
 import logging
 from abc import ABC, abstractmethod
+from tqdm import tqdm
 
 import gambitutils
 
@@ -86,24 +87,34 @@ class BayesianGame(ABC):
         self.opponent_specification.add_to_strategy_catalogue(opponent_strategy, opponent_strategy_desc)
 
     def get_strategic_game_format(self):
+        logging.info("Obtaining strategies for the strong bidder")
         player_strategies = self.player_specification.get_pure_strategies()
+
+        logging.info("Obtaining strategies for the weak bidder")
         opponent_strategies = self.opponent_specification.get_pure_strategies()
 
         profile_payoffs = []
+        cell_entries = len(opponent_strategies) * len(player_strategies)
 
-        for opponent_strategy, player_strategy in itertools.product(opponent_strategies, player_strategies):
-            payoffs = self.get_expected_utilities((player_strategy, opponent_strategy))
+        logging.info(
+            "Calculating payoff values for " + str(cell_entries) + " entries ..")
 
-            player_strategy_desc = self.player_specification.get_strategy_description(
-                player_strategy)
-            opponent_strategy_desc = self.opponent_specification.get_strategy_description(opponent_strategy)
-            self.register_action_profile(player_strategy, player_strategy_desc, opponent_strategy,
-                                         opponent_strategy_desc)
+        with tqdm(total=cell_entries) as progress_bar:
+            for opponent_strategy, player_strategy in tqdm(itertools.product(opponent_strategies, player_strategies)):
+                payoffs = self.get_expected_utilities((player_strategy, opponent_strategy))
 
-            profile_name = "P1_" + player_strategy_desc + "_P2_" + opponent_strategy_desc
+                player_strategy_desc = self.player_specification.get_strategy_description(
+                    player_strategy)
+                opponent_strategy_desc = self.opponent_specification.get_strategy_description(opponent_strategy)
+                self.register_action_profile(player_strategy, player_strategy_desc, opponent_strategy,
+                                             opponent_strategy_desc)
 
-            # logging.info("Profile: " + profile_name + " Payoffs: " + str(payoffs))
-            profile_payoffs.append((profile_name, payoffs))
+                profile_name = "P1_" + player_strategy_desc + "_P2_" + opponent_strategy_desc
+
+                logging.debug("Profile: " + profile_name + " Payoffs: " + str(payoffs))
+                profile_payoffs.append((profile_name, payoffs))
+
+                progress_bar.update(1)
 
         strategies_catalogues = self.get_strategy_catalogues()
         return gambitutils.get_strategic_game_format(self.game_name, strategies_catalogues, profile_payoffs)
