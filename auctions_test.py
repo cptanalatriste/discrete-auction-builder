@@ -11,8 +11,22 @@ class FirstPriceAuctionTest(unittest.TestCase):
         self.sample_auction = FirstPriceAuction(game_name="toy_auction", player_valuations=[50, 51, 52],
                                                 opponent_valuations=[50, 51])
 
+    def test_no_jumpy_strategies(self):
+        another_auction = FirstPriceAuction(game_name="another_toy_auction", player_valuations=[50, 51, 52, 53],
+                                            opponent_valuations=[50, 51, 52])
+
+        expected_player_strategies = [(50, 50, 50, 50), (50, 50, 50, 51), (50, 50, 51, 51), (50, 50, 51, 52),
+                                      (50, 51, 51, 51), (50, 51, 51, 52), (50, 51, 52, 52), (50, 51, 52, 53)]
+        actual_player_strategies = another_auction.player_specification.get_pure_strategies()
+
+        self.assertEquals(sorted(actual_player_strategies), sorted(expected_player_strategies))
+
+        expected_oponent_strategies = [(50, 50, 50), (50, 50, 51), (50, 51, 51), (50, 51, 52)]
+        actual_opponent_strategies = another_auction.opponent_specification.get_pure_strategies()
+        self.assertEquals(sorted(actual_opponent_strategies), sorted(expected_oponent_strategies))
+
     def test_pure_strategies(self):
-        expected_strategies = [(50, 50, 50), (50, 50, 51), (50, 50, 52), (50, 51, 51), (50, 51, 52)]
+        expected_strategies = [(50, 50, 50), (50, 50, 51), (50, 51, 51), (50, 51, 52)]
         actual_strategies = list(self.sample_auction.player_specification.get_pure_strategies())
         self.assertEqual(actual_strategies, expected_strategies)
 

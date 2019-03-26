@@ -1,4 +1,3 @@
-import itertools
 import logging
 from fractions import Fraction
 import time
@@ -16,20 +15,29 @@ class AuctionPlayerSpecification(PlayerSpecification):
                                                          player_actions=player_valuations)
 
     def initialize_pure_strategies(self):
-        pure_strategies = []
-
-        for valuation in self.player_types:
-            pure_strategies.append([bid for bid in self.player_actions if bid <= valuation])
-
-        return itertools.filterfalse(lambda s: not self.is_valid_strategy(s),
-                                     itertools.product(*pure_strategies))
-
-    def generate_no_jumpy_strategies(self):
-        bidding_graph = nx.Graph()
+        bidding_graph = nx.DiGraph()
         parent_node = (self.player_types[0], self.player_actions[0])
         bidding_graph.add_node(parent_node)
 
+        pure_strategies = []
         self.add_bids(type_index=1, bidding_graph=bidding_graph, parent_node=parent_node)
+
+        logging.debug("bidding_graph: ", bidding_graph.edges)
+
+        for node in bidding_graph:
+            logging.debug("node", node, "bidding_graph.out_degree(node)", bidding_graph.out_degree(node))
+
+            if bidding_graph.out_degree(node) == 0:
+
+                for path in nx.all_simple_paths(bidding_graph, source=parent_node, target=node):
+                    pure_strategy = tuple(bid for _, bid in path)
+                    pure_strategies.append(pure_strategy)
+
+                    logging.debug("nx.shortest_path(bidding_graph, source=parent_node, target=node):" + str(nx.shortest_path(
+                        bidding_graph, source=parent_node, target=node)))
+                    logging.debug("pure_strategy" + str(pure_strategy))
+
+        return pure_strategies
 
     def add_bids(self, type_index, bidding_graph, parent_node):
         if type_index == len(self.player_types):
@@ -37,7 +45,7 @@ class AuctionPlayerSpecification(PlayerSpecification):
 
         valuation = self.player_types[type_index]
         previous_bid = parent_node[1]
-        valid_bids = [bid for bid in self.player_actions if valuation <= bid <= (previous_bid + 1)]
+        valid_bids = [bid for bid in self.player_actions if previous_bid <= bid <= (previous_bid + 1)]
 
         for bid in valid_bids:
             bid_per_valuation = (valuation, bid)
