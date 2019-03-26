@@ -2,6 +2,7 @@ import itertools
 import logging
 from fractions import Fraction
 import time
+import networkx as nx
 
 from gamebuilder import BayesianGame, PlayerSpecification
 
@@ -22,6 +23,26 @@ class AuctionPlayerSpecification(PlayerSpecification):
 
         return itertools.filterfalse(lambda s: not self.is_valid_strategy(s),
                                      itertools.product(*pure_strategies))
+
+    def generate_no_jumpy_strategies(self):
+        bidding_graph = nx.Graph()
+        parent_node = (self.player_types[0], self.player_actions[0])
+        bidding_graph.add_node(parent_node)
+
+        self.add_bids(type_index=1, bidding_graph=bidding_graph, parent_node=parent_node)
+
+    def add_bids(self, type_index, bidding_graph, parent_node):
+        if type_index == len(self.player_types):
+            return
+
+        valuation = self.player_types[type_index]
+        previous_bid = parent_node[1]
+        valid_bids = [bid for bid in self.player_actions if valuation <= bid <= (previous_bid + 1)]
+
+        for bid in valid_bids:
+            bid_per_valuation = (valuation, bid)
+            bidding_graph.add_edge(parent_node, bid_per_valuation)
+            self.add_bids(type_index=type_index + 1, bidding_graph=bidding_graph, parent_node=bid_per_valuation)
 
     @staticmethod
     def is_valid_strategy(strategy):
@@ -62,8 +83,6 @@ class FirstPriceAuction(BayesianGame):
 
 
 if __name__ == "__main__":
-
-
     # player_valuations = range(50, 53)
     # opponent_valuations = range(50, 52)
 
