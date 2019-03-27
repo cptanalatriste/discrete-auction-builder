@@ -69,12 +69,24 @@ class BayesianGameTest(unittest.TestCase):
         self.assertEqual(actual_strategies, expected_strategies)
 
     def test_get_utility(self):
+        expected_player_utility = 2.
         expected_opponent_utility = 1.
         player_strategy = ("U", "U")
         opponent_strategy = ("L", "L")
+
         actual_player_utility, actual_opponent_utility = self.sample_game.get_expected_utilities(
             (player_strategy, opponent_strategy))
+        self.assertAlmostEqual(actual_player_utility, expected_player_utility)
+        self.assertAlmostEqual(actual_opponent_utility, expected_opponent_utility)
 
+        expected_player_utility = 0.7
+        expected_opponent_utility = 0.1
+        player_strategy = ("D", "U")
+        opponent_strategy = ("R", "R")
+
+        actual_player_utility, actual_opponent_utility = self.sample_game.get_expected_utilities(
+            (player_strategy, opponent_strategy))
+        self.assertAlmostEqual(actual_player_utility, expected_player_utility)
         self.assertAlmostEqual(actual_opponent_utility, expected_opponent_utility)
 
     def test_get_payoffs_per_profile(self):
