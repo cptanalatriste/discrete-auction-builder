@@ -19,11 +19,11 @@ class FirstPriceAuctionTest(unittest.TestCase):
                                       (50, 51, 51, 51), (50, 51, 51, 52), (50, 51, 52, 52), (50, 51, 52, 53)]
         actual_player_strategies = another_auction.player_specification.get_pure_strategies()
 
-        self.assertEquals(sorted(actual_player_strategies), sorted(expected_player_strategies))
+        self.assertEqual(sorted(actual_player_strategies), sorted(expected_player_strategies))
 
         expected_oponent_strategies = [(50, 50, 50), (50, 50, 51), (50, 51, 51), (50, 51, 52)]
         actual_opponent_strategies = another_auction.opponent_specification.get_pure_strategies()
-        self.assertEquals(sorted(actual_opponent_strategies), sorted(expected_oponent_strategies))
+        self.assertEqual(sorted(actual_opponent_strategies), sorted(expected_oponent_strategies))
 
     def test_pure_strategies(self):
         expected_strategies = [(50, 50, 50), (50, 50, 51), (50, 51, 51), (50, 51, 52)]

@@ -2,8 +2,7 @@ import logging
 import subprocess
 from string import Template
 
-DEFAULT_PROCESS = "/Applications/Gambit.app/Contents/MacOS/gambit-enumpure"
-
+DEFAULT_PROCESS = "C:\Program Files (x86)\Gambit\gambit-enumpure.exe"
 
 def get_strategic_game_format(game_desc, strategies_catalogues, profile_payoffs):
     """

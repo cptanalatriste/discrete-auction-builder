@@ -19,6 +19,9 @@ class PlayerSpecification(object):
     def initialize_pure_strategies(self):
         return itertools.product(self.player_actions, repeat=len(self.player_types))
 
+    def get_num_strategies(self):
+        return pow(len(self.player_actions), len(self.player_types))
+
     def get_pure_strategies(self):
         return self.pure_strategies
 
@@ -54,8 +57,8 @@ class BayesianGame(ABC):
 
     def get_expected_utilities(self, strategy_profile):
         player_strategy, opponent_strategy = strategy_profile
-        types_iterator = itertools.product(self.player_specification.player_types,
-                                           self.opponent_specification.player_types)
+        types_iterator = ((player_type, opponent_type) for player_type in self.player_specification.player_types for
+                          opponent_type in self.opponent_specification.player_types)
 
         expected_player_utility, expected_opponent_utility = 0, 0
         for player_type, opponent_type in types_iterator:
@@ -86,7 +89,10 @@ class BayesianGame(ABC):
         self.player_specification.add_to_strategy_catalogue(player_strategy, player_strategy_desc)
         self.opponent_specification.add_to_strategy_catalogue(opponent_strategy, opponent_strategy_desc)
 
-    def get_strategic_game_format(self):
+    def get_number_of_entries(self):
+        return self.player_specification.get_num_strategies() * self.opponent_specification.get_num_strategies()
+
+    def get_payoffs_per_profile(self):
         logging.info("Obtaining strategies for the strong bidder")
         player_strategies = self.player_specification.get_pure_strategies()
 
@@ -94,13 +100,14 @@ class BayesianGame(ABC):
         opponent_strategies = self.opponent_specification.get_pure_strategies()
 
         profile_payoffs = []
-        cell_entries = len(opponent_strategies) * len(player_strategies)
+        cell_entries = self.get_number_of_entries()
 
         logging.info(
             "Calculating payoff values for " + str(cell_entries) + " entries ..")
 
         with tqdm(total=cell_entries) as progress_bar:
-            for opponent_strategy, player_strategy in tqdm(itertools.product(opponent_strategies, player_strategies)):
+            cell_iterator = itertools.product(opponent_strategies, player_strategies)
+            for opponent_strategy, player_strategy in cell_iterator:
                 payoffs = self.get_expected_utilities((player_strategy, opponent_strategy))
 
                 player_strategy_desc = self.player_specification.get_strategy_description(
@@ -116,12 +123,19 @@ class BayesianGame(ABC):
 
                 progress_bar.update(1)
 
+        payoffs_obtained = len(profile_payoffs)
+        if payoffs_obtained != cell_entries:
+            raise Exception("The number of payoffs obtained doesn't match the estimate. Calculated: " + str(
+                payoffs_obtained) + " .Estimated: " + str(cell_entries))
+
         strategies_catalogues = self.get_strategy_catalogues()
-        return gambitutils.get_strategic_game_format(self.game_name, strategies_catalogues, profile_payoffs)
+        return strategies_catalogues, profile_payoffs
 
     def calculate_equilibria(self):
         logging.info("Starting equilibrium calculation ...")
-        nfg_file = self.get_strategic_game_format()
+        strategies_catalogues, profile_payoffs = self.get_payoffs_per_profile()
+
+        nfg_file = gambitutils.get_strategic_game_format(self.game_name, strategies_catalogues, profile_payoffs)
         logging.info("Gambit file generated at " + nfg_file)
 
         strategies_catalogues = self.get_strategy_catalogues()

@@ -1,3 +1,4 @@
+import itertools
 import logging
 from fractions import Fraction
 import time
@@ -14,6 +15,9 @@ class AuctionPlayerSpecification(PlayerSpecification):
         super(AuctionPlayerSpecification, self).__init__(player_types=player_valuations,
                                                          player_actions=player_valuations)
 
+    def get_num_strategies(self):
+        return pow(2, len(self.player_types) - 1)
+
     def initialize_pure_strategies(self):
         bidding_graph = nx.DiGraph()
         parent_node = (self.player_types[0], self.player_actions[0])
@@ -28,16 +32,10 @@ class AuctionPlayerSpecification(PlayerSpecification):
             logging.debug("node", node, "bidding_graph.out_degree(node)", bidding_graph.out_degree(node))
 
             if bidding_graph.out_degree(node) == 0:
+                pure_strategies.append(map(lambda path: tuple(bid for _, bid in path),
+                                           nx.all_simple_paths(bidding_graph, source=parent_node, target=node)))
 
-                for path in nx.all_simple_paths(bidding_graph, source=parent_node, target=node):
-                    pure_strategy = tuple(bid for _, bid in path)
-                    pure_strategies.append(pure_strategy)
-
-                    logging.debug("nx.shortest_path(bidding_graph, source=parent_node, target=node):" + str(nx.shortest_path(
-                        bidding_graph, source=parent_node, target=node)))
-                    logging.debug("pure_strategy" + str(pure_strategy))
-
-        return pure_strategies
+        return itertools.chain.from_iterable(pure_strategies)
 
     def add_bids(self, type_index, bidding_graph, parent_node):
         if type_index == len(self.player_types):
@@ -100,11 +98,11 @@ if __name__ == "__main__":
     # player_valuations = range(50, 59)
     # opponent_valuations = range(50, 56)
 
-    # player_valuations = range(50, 62)
-    # opponent_valuations = range(50, 58)
-
-    player_valuations = range(50, 65)
-    opponent_valuations = range(50, 60)
+    player_valuations = range(50, 62)
+    opponent_valuations = range(50, 58)
+    #
+    # player_valuations = range(50, 65)
+    # opponent_valuations = range(50, 60)
 
     # player_valuations = range(50, 200 + 1)
     # opponent_valuations = range(50, 150 + 1)

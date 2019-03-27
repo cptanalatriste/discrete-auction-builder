@@ -3,7 +3,7 @@ from fractions import Fraction
 
 import numpy as np
 
-from auctionsnp import FirstPriceAuction
+from numpy.auctionsnp import FirstPriceAuction
 from gamebuildernp import Strategy
 
 
