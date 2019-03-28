@@ -98,11 +98,11 @@ if __name__ == "__main__":
     # player_valuations = range(50, 59)
     # opponent_valuations = range(50, 56)
 
-    player_valuations = range(50, 62)
-    opponent_valuations = range(50, 58)
+    # player_valuations = range(50, 62)
+    # opponent_valuations = range(50, 58)
     #
-    # player_valuations = range(50, 65)
-    # opponent_valuations = range(50, 60)
+    player_valuations = range(50, 65)
+    opponent_valuations = range(50, 60)
 
     # player_valuations = range(50, 200 + 1)
     # opponent_valuations = range(50, 150 + 1)
