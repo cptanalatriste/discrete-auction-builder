@@ -89,8 +89,7 @@ class BayesianGameTest(unittest.TestCase):
         self.assertAlmostEqual(actual_player_utility, expected_player_utility)
         self.assertAlmostEqual(actual_opponent_utility, expected_opponent_utility)
 
-    def test_get_payoffs_per_profile(self):
-        _, profile_payoffs = self.sample_game.get_payoffs_per_profile()
-        cell_entries = self.sample_game.get_number_of_entries()
-
-        self.assertEqual(len(profile_payoffs), cell_entries)
+    def test_to_nfg_file(self):
+        nfg_file, _ = self.sample_game.to_nfg_file()
+        expected_file_name = self.sample_game.game_name + ".nfg"
+        self.assertEqual(nfg_file, expected_file_name)

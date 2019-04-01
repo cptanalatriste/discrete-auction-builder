@@ -1,8 +1,53 @@
 import logging
 import subprocess
 from string import Template
+import os
 
 DEFAULT_PROCESS = "C:\Program Files (x86)\Gambit\gambit-enumpure.exe"
+
+
+def start_nfg_section(nfg_file):
+    nfg_file.write(os.linesep + "{")
+
+
+def close_nfg_section(nfg_file):
+    nfg_file.write("}")
+
+
+def register_profile_payoff(nfg_file, profile_name, payoffs):
+    payoff_strings = [str(payoff) for payoff in payoffs]
+    payoff_line = '{ "' + profile_name + '" ' + ",".join(payoff_strings) + " }"
+    nfg_file.write(payoff_line + os.linesep)
+
+
+def write_profile_ordering(nfg_file, profile_ordering):
+    profile_ordering = " ".join(profile_ordering)
+    nfg_file.write(os.linesep + profile_ordering)
+
+
+def start_nfg_file(game_description, strategies_catalogues):
+    first_line = 'NFG 1 R "$game_desc" { $player_catalog }'
+    first_line_template = Template(first_line)
+
+    players = set(['"Player_' + str(player_number) + '"' for player_number in range(len(strategies_catalogues))])
+    player_catalog = " ".join(players)
+    file_name = game_description + ".nfg"
+
+    with open(file_name, "w") as nfg_file:
+        nfg_file.write(first_line_template.substitute({
+            'game_desc': game_description,
+            'player_catalog': player_catalog}))
+
+        start_nfg_section(nfg_file)
+
+        for strategy_catalogue in strategies_catalogues:
+            actions = " ".join(['"' + strategy + '"' for strategy in strategy_catalogue])
+            nfg_file.write("{ " + actions + " }" + os.linesep)
+
+        close_nfg_section(nfg_file)
+
+    return file_name
+
 
 def get_strategic_game_format(game_desc, strategies_catalogues, profile_payoffs):
     """
@@ -15,7 +60,7 @@ def get_strategic_game_format(game_desc, strategies_catalogues, profile_payoffs)
                '{\n$payoff_per_profile\n}\n$profile_ordering'
 
     nfg_template = Template(template)
-    teams = set(['"Player_' + str(team_number) + '"' for team_number in range(len(strategies_catalogues))])
+    players = set(['"Player_' + str(player_number) + '"' for player_number in range(len(strategies_catalogues))])
 
     action_list = []
     for strategies_catalog in strategies_catalogues:
@@ -33,7 +78,7 @@ def get_strategic_game_format(game_desc, strategies_catalogues, profile_payoffs)
         profile_lines.append(payoff_line)
         profile_ordering.append(str(index + 1))
 
-    player_catalog = " ".join(teams)
+    player_catalog = " ".join(players)
     actions_per_player = "\n".join(action_list)
     payoff_per_profile = "\n".join(profile_lines)
     profile_ordering = " ".join(profile_ordering)
