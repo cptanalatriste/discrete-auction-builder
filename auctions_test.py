@@ -1,19 +1,24 @@
 import unittest
 from fractions import Fraction
 
-from auctions import FirstPriceAuction
+from auctions import FirstPriceAuction, GnuthPlayerSpecification
 
 
-class FirstPriceAuctionTest(unittest.TestCase):
+class GnuthAuctionTest(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
-        super(FirstPriceAuctionTest, self).__init__(*args, **kwargs)
-        self.sample_auction = FirstPriceAuction(game_name="toy_auction", player_valuations=[50, 51, 52],
-                                                opponent_valuations=[50, 51])
+        super(GnuthAuctionTest, self).__init__(*args, **kwargs)
+        player_specification = GnuthPlayerSpecification(player_valuations=[50, 51, 52])
+        opponent_specification = GnuthPlayerSpecification(player_valuations=[50, 51])
+
+        self.sample_auction = FirstPriceAuction(game_name="toy_auction", player_specification=player_specification,
+                                                opponent_specification=opponent_specification)
 
     def test_no_jumpy_strategies(self):
-        another_auction = FirstPriceAuction(game_name="another_toy_auction", player_valuations=[50, 51, 52, 53],
-                                            opponent_valuations=[50, 51, 52])
+        player_specification = GnuthPlayerSpecification(player_valuations=[50, 51, 52, 53])
+        opponent_specification = GnuthPlayerSpecification(player_valuations=[50, 51, 52])
+        another_auction = FirstPriceAuction(game_name="another_toy_auction", player_specification=player_specification,
+                                            opponent_specification=opponent_specification)
 
         expected_player_strategies = [(50, 50, 50, 50), (50, 50, 50, 51), (50, 50, 51, 51), (50, 50, 51, 52),
                                       (50, 51, 51, 51), (50, 51, 51, 52), (50, 51, 52, 52), (50, 51, 52, 53)]

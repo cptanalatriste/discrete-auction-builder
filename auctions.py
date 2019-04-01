@@ -9,11 +9,11 @@ from gamebuilder import BayesianGame, PlayerSpecification
 logging.basicConfig(level=logging.INFO)
 
 
-class AuctionPlayerSpecification(PlayerSpecification):
+class GnuthPlayerSpecification(PlayerSpecification):
 
     def __init__(self, player_valuations):
-        super(AuctionPlayerSpecification, self).__init__(player_types=player_valuations,
-                                                         player_actions=player_valuations)
+        super(GnuthPlayerSpecification, self).__init__(player_types=player_valuations,
+                                                       player_actions=player_valuations)
 
     def get_num_strategies(self):
         return pow(2, len(self.player_types) - 1)
@@ -50,25 +50,14 @@ class AuctionPlayerSpecification(PlayerSpecification):
             bidding_graph.add_edge(parent_node, bid_per_valuation)
             self.add_bids(type_index=type_index + 1, bidding_graph=bidding_graph, parent_node=bid_per_valuation)
 
-    @staticmethod
-    def is_valid_strategy(strategy):
-        for index, current_bid in enumerate(strategy):
-            if index > 0:
-                previous_bid = strategy[index - 1]
-
-                if previous_bid > current_bid:
-                    return False
-
-        return True
-
 
 class FirstPriceAuction(BayesianGame):
 
-    def __init__(self, game_name, player_valuations, opponent_valuations):
+    def __init__(self, game_name, player_specification, opponent_specification):
         super(FirstPriceAuction, self).__init__(
             game_name=game_name,
-            player_specification=AuctionPlayerSpecification(player_valuations=player_valuations),
-            opponent_specification=AuctionPlayerSpecification(player_valuations=opponent_valuations))
+            player_specification=player_specification,
+            opponent_specification=opponent_specification)
 
     def get_types_probability(self, player_type, opponent_type):
         return Fraction(1, len(self.player_specification.player_types) * len(self.opponent_specification.player_types))
@@ -88,31 +77,4 @@ class FirstPriceAuction(BayesianGame):
             return Fraction(player_type - player_bid, 2), Fraction(opponent_type - opponent_bid, 2)
 
 
-if __name__ == "__main__":
-    # player_valuations = range(50, 53)
-    # opponent_valuations = range(50, 52)
 
-    # player_valuations = range(50, 56)
-    # opponent_valuations = range(50, 54)
-    #
-    # player_valuations = range(50, 59)
-    # opponent_valuations = range(50, 56)
-
-    # player_valuations = range(50, 62)
-    # opponent_valuations = range(50, 58)
-
-    player_valuations = range(50, 65)
-    opponent_valuations = range(50, 60)
-
-    # player_valuations = range(50, 200 + 1)
-    # opponent_valuations = range(50, 150 + 1)
-
-    game_name = str(len(player_valuations)) + "_strong_" + str(len(opponent_valuations)) + "_weak_auction"
-
-    start_time = time.time()
-    sample_auction = FirstPriceAuction(game_name=game_name, player_valuations=player_valuations,
-                                       opponent_valuations=opponent_valuations)
-
-    sample_auction.calculate_equilibria()
-
-    logging.info("--- %s seconds ---" % (time.time() - start_time))
