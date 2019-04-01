@@ -1,7 +1,21 @@
 import logging
 import time
 
-from auctions import GnuthPlayerSpecification, FirstPriceAuction
+from auctions import GnuthPlayerSpecification, FirstPriceAuction, PezanisAuction
+
+
+def do_pezanis_experiments():
+    player_valuations = range(0, 3)
+    opponent_valuations = range(-6, 3)
+
+    game_name = "pezanis_" + str(len(player_valuations)) + "_strong_" + str(len(opponent_valuations)) + "_weak_auction"
+
+    start_time = time.time()
+    sample_auction = PezanisAuction(game_name=game_name, player_valuations=player_valuations,
+                                    opponent_valuations=opponent_valuations)
+
+    sample_auction.calculate_equilibria()
+    logging.info("--- %s seconds ---" % (time.time() - start_time))
 
 
 def do_gnuth_experiments():
@@ -37,4 +51,4 @@ def do_gnuth_experiments():
 
 
 if __name__ == "__main__":
-    do_gnuth_experiments()
+    do_pezanis_experiments()

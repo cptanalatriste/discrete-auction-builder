@@ -38,6 +38,9 @@ class PlayerSpecification(object):
     def get_type_index(self, player_type):
         return self.player_types.index(player_type)
 
+    def get_action_index(self, player_action):
+        return self.player_actions.index(player_action)
+
     def get_strategy_index(self, player_strategy):
         return self.strategy_catalogue.index(player_strategy)
 
@@ -85,17 +88,12 @@ class BayesianGame(ABC):
 
     def to_nfg_file(self):
         logging.info("Obtaining strategies for the strong bidder")
-        player_strategies = self.player_specification.get_strategy_catalogue()
-        list(self.player_specification.get_pure_strategies())
+        player_strategies = list(self.player_specification.get_pure_strategies())
 
         logging.info("Obtaining strategies for the weak bidder")
-        opponent_strategies = self.opponent_specification.get_strategy_catalogue()
+        opponent_strategies = list(self.opponent_specification.get_pure_strategies())
 
         profile_ordering = []
-        cell_entries = self.get_number_of_entries()
-
-        logging.info(
-            "Writing payoff values for " + str(cell_entries) + " entries ...")
 
         player_strategy_catalogue = [self.player_specification.get_strategy_description(player_strategy) for
                                      player_strategy in player_strategies]
@@ -104,8 +102,13 @@ class BayesianGame(ABC):
 
         strategy_catalogues = [player_strategy_catalogue, opponent_strategy_catalogue]
         file_name = gambitutils.start_nfg_file(self.game_name, strategy_catalogues)
-        logging.info("File " + file_name + " created. Starting appending payoff values ...")
 
+        cell_entries = self.get_number_of_entries()
+        if cell_entries is None:
+            cell_entries = len(player_strategies) * len(opponent_strategies)
+
+        logging.info("File " + file_name + " created. Starting appending payoff values ...")
+        logging.info("Writing payoff values for " + str(cell_entries) + " entries ...")
         with tqdm(total=cell_entries) as progress_bar, open(file_name, "a") as nfg_file:
 
             gambitutils.start_nfg_section(nfg_file)
