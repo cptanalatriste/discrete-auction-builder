@@ -8,6 +8,32 @@ from gamebuilder import BayesianGame, PlayerSpecification
 logging.basicConfig(level=logging.INFO)
 
 
+class FirstPriceAuction(BayesianGame):
+
+    def __init__(self, game_name, player_specification, opponent_specification):
+        super(FirstPriceAuction, self).__init__(
+            game_name=game_name,
+            player_specification=player_specification,
+            opponent_specification=opponent_specification)
+
+    def get_types_probability(self, player_type, opponent_type):
+        return Fraction(1, len(self.player_specification.player_types) * len(self.opponent_specification.player_types))
+
+    def get_utility(self, player_type, player_strategy, opponent_type, opponnet_strategy):
+        player_type_index = self.player_specification.get_type_index(player_type)
+        player_bid = player_strategy[player_type_index]
+
+        opponent_type_index = self.opponent_specification.get_type_index(opponent_type)
+        opponent_bid = opponnet_strategy[opponent_type_index]
+
+        if player_bid > opponent_bid:
+            return player_type - player_bid, 0
+        elif opponent_bid > player_bid:
+            return 0, opponent_type - opponent_bid
+        else:
+            return Fraction(player_type - player_bid, 2), Fraction(opponent_type - opponent_bid, 2)
+
+
 class GnuthPlayerSpecification(PlayerSpecification):
 
     def __init__(self, player_valuations):
@@ -39,40 +65,18 @@ class GnuthPlayerSpecification(PlayerSpecification):
             self.add_bids(type_index=type_index + 1, bidding_graph=bidding_graph, parent_node=bid_per_valuation)
 
 
-class FirstPriceAuction(BayesianGame):
-
-    def __init__(self, game_name, player_specification, opponent_specification):
-        super(FirstPriceAuction, self).__init__(
-            game_name=game_name,
-            player_specification=player_specification,
-            opponent_specification=opponent_specification)
-
-    def get_types_probability(self, player_type, opponent_type):
-        return Fraction(1, len(self.player_specification.player_types) * len(self.opponent_specification.player_types))
-
-    def get_utility(self, player_type, player_strategy, opponent_type, opponnet_strategy):
-        player_type_index = self.player_specification.get_type_index(player_type)
-        player_bid = player_strategy[player_type_index]
-
-        opponent_type_index = self.opponent_specification.get_type_index(opponent_type)
-        opponent_bid = opponnet_strategy[opponent_type_index]
-
-        if player_bid > opponent_bid:
-            return player_type - player_bid, 0
-        elif opponent_bid > player_bid:
-            return 0, opponent_type - opponent_bid
-        else:
-            return Fraction(player_type - player_bid, 2), Fraction(opponent_type - opponent_bid, 2)
-
-
 class PezanisPlayerSpecification(PlayerSpecification):
 
-    def __init__(self, player_valuations):
+    def __init__(self, player_valuations, no_jumps=False):
         player_actions = [action for action in player_valuations if action >= 0]
+        self.no_jumps = no_jumps
         super(PezanisPlayerSpecification, self).__init__(player_types=player_valuations,
                                                          player_actions=player_actions)
 
     def initialize_pure_strategies(self):
+        if self.no_jumps:
+            logging.info("Jumpy strategies are excluded!")
+
         bidding_graph = nx.DiGraph()
 
         parent_node = (self.player_actions[0], self.player_actions[0])
@@ -81,6 +85,23 @@ class PezanisPlayerSpecification(PlayerSpecification):
 
         return get_strategies_from_graph(parent_node, bidding_graph)
 
+    def add_bids(self, action_index, bidding_graph, parent_node):
+        if action_index == len(self.player_actions):
+            return
+
+        valuation = self.get_action_index(action_index)
+        previous_bid = parent_node[1]
+        max_bid = valuation
+        if self.no_jumps:
+            max_bid = previous_bid + 1
+
+        valid_bids = [bid for bid in self.player_actions if previous_bid <= bid <= max_bid]
+
+        for bid in valid_bids:
+            bid_per_valuation = (valuation, bid)
+            bidding_graph.add_edge(parent_node, bid_per_valuation)
+            self.add_bids(action_index=action_index + 1, bidding_graph=bidding_graph, parent_node=bid_per_valuation)
+
     def get_strategy_description(self, strategy):
         strategy_description = ""
 
@@ -88,24 +109,11 @@ class PezanisPlayerSpecification(PlayerSpecification):
             strategy_description += "Type_" + str(self.player_actions[type_index]) + "_action_" + str(action) + "_"
         return strategy_description[:-1]
 
-    def add_bids(self, action_index, bidding_graph, parent_node):
-        if action_index == len(self.player_actions):
-            return
-
-        valuation = self.get_action_index(action_index)
-        previous_bid = parent_node[1]
-        valid_bids = [bid for bid in self.player_actions if previous_bid <= bid <= valuation]
-
-        for bid in valid_bids:
-            bid_per_valuation = (valuation, bid)
-            bidding_graph.add_edge(parent_node, bid_per_valuation)
-            self.add_bids(action_index=action_index + 1, bidding_graph=bidding_graph, parent_node=bid_per_valuation)
-
 
 class PezanisAuction(FirstPriceAuction):
-    def __init__(self, game_name, player_valuations, opponent_valuations):
-        player_specification = PezanisPlayerSpecification(player_valuations=player_valuations)
-        opponent_specification = PezanisPlayerSpecification(player_valuations=opponent_valuations)
+    def __init__(self, game_name, player_valuations, opponent_valuations, no_jumps=False):
+        player_specification = PezanisPlayerSpecification(player_valuations=player_valuations, no_jumps=no_jumps)
+        opponent_specification = PezanisPlayerSpecification(player_valuations=opponent_valuations, no_jumps=no_jumps)
 
         super(PezanisAuction, self).__init__(
             game_name=game_name,

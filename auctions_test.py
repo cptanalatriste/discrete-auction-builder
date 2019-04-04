@@ -89,6 +89,18 @@ class PezanisAuctionTest(unittest.TestCase):
         self.sample_auction = PezanisAuction(game_name="pezanis_auction", player_valuations=[0, 1, 2],
                                              opponent_valuations=[-6, -5, -4, -3, -2, -1, 0, 1, 2])
 
+    def test_no_jumpy_strategies(self):
+        another_sample_auction = PezanisAuction(game_name="pezanis_auction", player_valuations=[0, 1, 2],
+                                                opponent_valuations=[-6, -5, -4, -3, -2, -1, 0, 1, 2],
+                                                no_jumps=True)
+
+        expected_strategies = [(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 2)]
+        player_strategies = list(another_sample_auction.player_specification.get_pure_strategies())
+        self.assertEqual(sorted(expected_strategies), sorted(player_strategies))
+
+        opponent_strategies = list(another_sample_auction.opponent_specification.get_pure_strategies())
+        self.assertEqual(sorted(opponent_strategies), sorted(player_strategies))
+
     def test_auction_utilities(self):
         expected_strong_utility = Fraction(5, 6)
         expected_weak_utility = Fraction(1, 6)
