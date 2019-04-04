@@ -25,7 +25,8 @@ class PlayerSpecification(object):
         return self.pure_strategies
 
     def get_strategy_catalogue(self):
-        self.strategy_catalogue = list(self.get_pure_strategies())
+        if self.strategy_catalogue is None:
+            self.strategy_catalogue = list(self.get_pure_strategies())
         return self.strategy_catalogue
 
     def get_strategy_description(self, strategy):
@@ -88,10 +89,10 @@ class BayesianGame(ABC):
 
     def to_nfg_file(self):
         logging.info("Obtaining strategies for the strong bidder")
-        player_strategies = list(self.player_specification.get_pure_strategies())
+        player_strategies = self.player_specification.get_strategy_catalogue()
 
         logging.info("Obtaining strategies for the weak bidder")
-        opponent_strategies = list(self.opponent_specification.get_pure_strategies())
+        opponent_strategies = self.opponent_specification.get_strategy_catalogue()
 
         profile_ordering = []
 

@@ -22,19 +22,8 @@ class GnuthPlayerSpecification(PlayerSpecification):
         parent_node = (self.player_types[0], self.player_actions[0])
         bidding_graph.add_node(parent_node)
 
-        pure_strategies = []
         self.add_bids(type_index=1, bidding_graph=bidding_graph, parent_node=parent_node)
-
-        logging.debug("bidding_graph: ", bidding_graph.edges)
-
-        for node in bidding_graph:
-            logging.debug("node", node, "bidding_graph.out_degree(node)", bidding_graph.out_degree(node))
-
-            if bidding_graph.out_degree(node) == 0:
-                pure_strategies.append(map(lambda path: tuple(bid for _, bid in path),
-                                           nx.all_simple_paths(bidding_graph, source=parent_node, target=node)))
-
-        return itertools.chain.from_iterable(pure_strategies)
+        return get_strategies_from_graph(parent_node, bidding_graph)
 
     def add_bids(self, type_index, bidding_graph, parent_node):
         if type_index == len(self.player_types):
@@ -85,22 +74,12 @@ class PezanisPlayerSpecification(PlayerSpecification):
 
     def initialize_pure_strategies(self):
         bidding_graph = nx.DiGraph()
+
         parent_node = (self.player_actions[0], self.player_actions[0])
         bidding_graph.add_node(parent_node)
-
-        pure_strategies = []
         self.add_bids(action_index=1, bidding_graph=bidding_graph, parent_node=parent_node)
 
-        logging.debug("bidding_graph: ", bidding_graph.edges)
-
-        for node in bidding_graph:
-            logging.debug("node", node, "bidding_graph.out_degree(node)", bidding_graph.out_degree(node))
-
-            if bidding_graph.out_degree(node) == 0:
-                pure_strategies.append(map(lambda path: tuple(bid for _, bid in path),
-                                           nx.all_simple_paths(bidding_graph, source=parent_node, target=node)))
-
-        return itertools.chain.from_iterable(pure_strategies)
+        return get_strategies_from_graph(parent_node, bidding_graph)
 
     def get_strategy_description(self, strategy):
         strategy_description = ""
@@ -115,7 +94,7 @@ class PezanisPlayerSpecification(PlayerSpecification):
 
         valuation = self.get_action_index(action_index)
         previous_bid = parent_node[1]
-        valid_bids = [bid for bid in self.player_actions if bid >= previous_bid and bid <= valuation]
+        valid_bids = [bid for bid in self.player_actions if previous_bid <= bid <= valuation]
 
         for bid in valid_bids:
             bid_per_valuation = (valuation, bid)
@@ -161,3 +140,17 @@ class PezanisAuction(FirstPriceAuction):
             return opponent_wins
         else:
             return Fraction(player_type - player_bid, 2), Fraction(opponent_type - opponent_bid, 2)
+
+
+def get_strategies_from_graph(parent_node, bidding_graph):
+    pure_strategies = []
+    logging.debug("bidding_graph: ", bidding_graph.edges)
+
+    for node in bidding_graph:
+        logging.debug("node", node, "bidding_graph.out_degree(node)", bidding_graph.out_degree(node))
+
+        if bidding_graph.out_degree(node) == 0:
+            pure_strategies.append(map(lambda path: tuple(bid for _, bid in path),
+                                       nx.all_simple_paths(bidding_graph, source=parent_node, target=node)))
+
+    return itertools.chain.from_iterable(pure_strategies)
