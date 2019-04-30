@@ -162,15 +162,35 @@ class AllPayAuctionTest(unittest.TestCase):
         self.assertEqual(actual_player_utility, expected_player_utility)
         self.assertEqual(actual_opponent_utility, expected_opponent_utility)
 
-        # expected_player_utility = Fraction(-1, 9)
-        # expected_opponent_utility = Fraction(-1, 9)
-        # player_strategy = (0, 0, 1)
-        # opponent_strategy = (0, 1, 2)
-        #
-        # actual_player_utility, actual_opponent_utility = self.sample_auction.get_expected_utilities(
-        #     (player_strategy, opponent_strategy))
-        # self.assertEqual(actual_player_utility, expected_player_utility)
-        # self.assertEqual(actual_opponent_utility, expected_opponent_utility)
+        expected_player_utility = Fraction(-1, 9)
+        expected_opponent_utility = Fraction(-1, 9)
+        player_strategy = (0, 0, 1)
+        opponent_strategy = (0, 1, 2)
+
+        actual_player_utility, actual_opponent_utility = another_sample_auction.get_expected_utilities(
+            (player_strategy, opponent_strategy))
+        self.assertEqual(actual_player_utility, expected_player_utility)
+        self.assertEqual(actual_opponent_utility, expected_opponent_utility)
+
+        expected_player_utility = 0
+        expected_opponent_utility = Fraction(1, 9)
+        player_strategy = (0, 0, 2)
+        opponent_strategy = (0, 0, 1)
+
+        actual_player_utility, actual_opponent_utility = another_sample_auction.get_expected_utilities(
+            (player_strategy, opponent_strategy))
+        self.assertEqual(actual_player_utility, expected_player_utility)
+        self.assertEqual(actual_opponent_utility, expected_opponent_utility)
+
+        expected_player_utility = Fraction(-4, 9)
+        expected_opponent_utility = Fraction(-4, 9)
+        player_strategy = (0, 1, 2)
+        opponent_strategy = (0, 1, 2)
+
+        actual_player_utility, actual_opponent_utility = another_sample_auction.get_expected_utilities(
+            (player_strategy, opponent_strategy))
+        self.assertEqual(actual_player_utility, expected_player_utility)
+        self.assertEqual(actual_opponent_utility, expected_opponent_utility)
 
 
 class PezanisAuctionTest(unittest.TestCase):

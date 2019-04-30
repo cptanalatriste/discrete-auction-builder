@@ -76,6 +76,9 @@ class AuctionPlayerSpecification(PlayerSpecification):
         super(AuctionPlayerSpecification, self).__init__(player_types=player_types,
                                                          player_actions=player_actions)
 
+    def get_num_strategies(self):
+        pass
+
     def initialize_pure_strategies(self):
         bidding_graph = nx.DiGraph()
         parent_node = (self.player_types[0], self.player_actions[0])

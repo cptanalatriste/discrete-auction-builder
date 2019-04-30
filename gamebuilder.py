@@ -85,7 +85,8 @@ class BayesianGame(ABC):
         return strategies_catalogues
 
     def get_number_of_entries(self):
-        return self.player_specification.get_num_strategies() * self.opponent_specification.get_num_strategies()
+        if self.player_specification.get_num_strategies() and self.opponent_specification.get_num_strategies():
+            return self.player_specification.get_num_strategies() * self.opponent_specification.get_num_strategies()
 
     def to_nfg_file(self):
         logging.info("Obtaining strategies for the strong bidder")

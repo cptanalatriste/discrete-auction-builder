@@ -1,7 +1,7 @@
 import logging
 import time
 
-from auctions import GnuthPlayerSpecification, FirstPriceAuction, PezanisAuction
+from auctions import GnuthPlayerSpecification, FirstPriceAuction, PezanisAuction, AuctionPlayerSpecification
 
 
 def do_pezanis_experiments():
@@ -19,6 +19,32 @@ def do_pezanis_experiments():
                                     no_jumps=True)
 
     sample_auction.calculate_equilibria()
+    logging.info("--- %s seconds ---" % (time.time() - start_time))
+
+
+def do_allpay_experiments():
+    player_valuations = range(0, 3)
+
+    game_name = "allpay_ties_" + str(len(player_valuations)) + "_valuations_auction"
+
+    start_time = time.time()
+
+    player_specification = AuctionPlayerSpecification(player_actions=player_valuations, player_types=player_valuations,
+                                                      no_jumps=False)
+    opponent_specification = AuctionPlayerSpecification(player_actions=player_valuations,
+                                                        player_types=player_valuations, no_jumps=False)
+    sample_auction = FirstPriceAuction(game_name=game_name, player_specification=player_specification,
+                                       opponent_specification=opponent_specification, all_pay=True,
+                                       no_ties=False)
+    sample_auction.calculate_equilibria()
+
+    game_name = "allpay_noties_" + str(len(player_valuations)) + "_valuations_auction"
+    another_sample_auction = FirstPriceAuction(game_name=game_name,
+                                               player_specification=player_specification,
+                                               opponent_specification=opponent_specification, all_pay=True,
+                                               no_ties=True)
+    another_sample_auction.calculate_equilibria()
+
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 
 
@@ -55,4 +81,4 @@ def do_gnuth_experiments():
 
 
 if __name__ == "__main__":
-    do_pezanis_experiments()
+    do_allpay_experiments()
