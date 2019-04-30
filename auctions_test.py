@@ -1,7 +1,7 @@
 import unittest
 from fractions import Fraction
 
-from auctions import FirstPriceAuction, GnuthPlayerSpecification, PezanisAuction
+from auctions import FirstPriceAuction, GnuthPlayerSpecification, PezanisAuction, AuctionPlayerSpecification
 
 
 class GnuthAuctionTest(unittest.TestCase):
@@ -79,6 +79,98 @@ class GnuthAuctionTest(unittest.TestCase):
             strong_equilibrium = equilibrium[(strong_bidder_index, strong_bidder_strategy)] == "1" or equilibrium[
                 (strong_bidder_index, other_strong_bidder_strategy)] == "1"
             self.assertTrue(strong_equilibrium)
+
+
+class AllPayAuctionTest(unittest.TestCase):
+
+    def __init__(self, *args, **kwargs):
+        super(AllPayAuctionTest, self).__init__(*args, **kwargs)
+
+        player_valuations = [0, 1, 2]
+        self.player_specification = AuctionPlayerSpecification(player_actions=player_valuations,
+                                                               player_types=player_valuations, no_jumps=False)
+        self.opponent_specification = AuctionPlayerSpecification(player_actions=player_valuations,
+                                                                 player_types=player_valuations, no_jumps=False)
+
+        self.sample_auction = FirstPriceAuction(game_name="allpay_auction",
+                                                player_specification=self.player_specification,
+                                                opponent_specification=self.opponent_specification, all_pay=True,
+                                                no_ties=False)
+
+    def test_pure_strategies(self):
+        expected_strategies = [(0, 0, 0), (0, 0, 1), (0, 0, 2), (0, 1, 1), (0, 1, 2)]
+        player_strategies = list(self.sample_auction.player_specification.get_pure_strategies())
+        self.assertEqual(sorted(expected_strategies), sorted(player_strategies))
+
+        opponent_strategies = list(self.sample_auction.opponent_specification.get_pure_strategies())
+        self.assertEqual(sorted(opponent_strategies), sorted(player_strategies))
+
+    def test_auction_utilities(self):
+        expected_player_utility = Fraction(1, 2)
+        expected_opponent_utility = Fraction(1, 2)
+        player_strategy = (0, 0, 0)
+        opponent_strategy = (0, 0, 0)
+
+        actual_player_utility, actual_opponent_utility = self.sample_auction.get_expected_utilities(
+            (player_strategy, opponent_strategy))
+        self.assertEqual(actual_player_utility, expected_player_utility)
+        self.assertEqual(actual_opponent_utility, expected_opponent_utility)
+
+        expected_player_utility = Fraction(1, 18)
+        expected_opponent_utility = Fraction(-1, 18)
+        player_strategy = (0, 0, 1)
+        opponent_strategy = (0, 1, 2)
+
+        actual_player_utility, actual_opponent_utility = self.sample_auction.get_expected_utilities(
+            (player_strategy, opponent_strategy))
+        self.assertEqual(actual_player_utility, expected_player_utility)
+        self.assertEqual(actual_opponent_utility, expected_opponent_utility)
+
+        expected_player_utility = Fraction(1, 9)
+        expected_opponent_utility = Fraction(2, 9)
+        player_strategy = (0, 0, 2)
+        opponent_strategy = (0, 0, 1)
+
+        actual_player_utility, actual_opponent_utility = self.sample_auction.get_expected_utilities(
+            (player_strategy, opponent_strategy))
+        self.assertEqual(actual_player_utility, expected_player_utility)
+        self.assertEqual(actual_opponent_utility, expected_opponent_utility)
+
+        expected_player_utility = Fraction(-5, 18)
+        expected_opponent_utility = Fraction(-5, 18)
+        player_strategy = (0, 1, 2)
+        opponent_strategy = (0, 1, 2)
+
+        actual_player_utility, actual_opponent_utility = self.sample_auction.get_expected_utilities(
+            (player_strategy, opponent_strategy))
+        self.assertEqual(actual_player_utility, expected_player_utility)
+        self.assertEqual(actual_opponent_utility, expected_opponent_utility)
+
+    def test_noties_utilities(self):
+        another_sample_auction = FirstPriceAuction(game_name="noties_auction",
+                                                   player_specification=self.player_specification,
+                                                   opponent_specification=self.opponent_specification, all_pay=True,
+                                                   no_ties=True)
+
+        expected_player_utility = 0
+        expected_opponent_utility = 0
+        player_strategy = (0, 0, 0)
+        opponent_strategy = (0, 0, 0)
+
+        actual_player_utility, actual_opponent_utility = another_sample_auction.get_expected_utilities(
+            (player_strategy, opponent_strategy))
+        self.assertEqual(actual_player_utility, expected_player_utility)
+        self.assertEqual(actual_opponent_utility, expected_opponent_utility)
+
+        # expected_player_utility = Fraction(-1, 9)
+        # expected_opponent_utility = Fraction(-1, 9)
+        # player_strategy = (0, 0, 1)
+        # opponent_strategy = (0, 1, 2)
+        #
+        # actual_player_utility, actual_opponent_utility = self.sample_auction.get_expected_utilities(
+        #     (player_strategy, opponent_strategy))
+        # self.assertEqual(actual_player_utility, expected_player_utility)
+        # self.assertEqual(actual_opponent_utility, expected_opponent_utility)
 
 
 class PezanisAuctionTest(unittest.TestCase):
