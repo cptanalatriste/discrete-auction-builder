@@ -80,6 +80,9 @@ class AuctionPlayerSpecification(PlayerSpecification):
         pass
 
     def initialize_pure_strategies(self):
+        if self.no_jumps:
+            logging.info("Jumpy strategies are excluded!")
+
         bidding_graph = nx.DiGraph()
         parent_node = (self.player_types[0], self.player_actions[0])
         bidding_graph.add_node(parent_node)
