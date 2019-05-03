@@ -26,7 +26,7 @@ def do_allpay_experiments():
     # player_valuations = range(0, 3)
     # player_valuations = range(0, 6)
 
-    player_valuations = range(0, 7)
+    player_valuations = range(0, 8)
 
     start_time = time.time()
 

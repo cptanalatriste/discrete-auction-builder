@@ -3,7 +3,7 @@ import subprocess
 from string import Template
 import os
 
-DEFAULT_PROCESS = "C:\Program Files (x86)\Gambit\gambit-enumpure.exe"
+DEFAULT_PROCESS = "/Applications/Gambit.app/Contents/MacOS/gambit-enumpure"
 
 
 def start_nfg_section(nfg_file):
@@ -121,6 +121,9 @@ def calculate_equilibrium(strategy_catalogues, gambit_file, gambit_process=DEFAU
             break
 
     start_index = 3
+
+    if len(nash_equilibrium_strings) == 0:
+        logging.warning("NO EQUILIBRIA WAS FOUND FOR GAME " + gambit_file)
 
     equilibrium_list = []
     for index, nash_equilibrium in enumerate(nash_equilibrium_strings):
