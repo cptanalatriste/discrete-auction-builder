@@ -1,13 +1,12 @@
 import logging
 import subprocess
 from string import Template
-import os
 
 DEFAULT_PROCESS = "/Applications/Gambit.app/Contents/MacOS/gambit-enumpure"
 
 
 def start_nfg_section(nfg_file):
-    nfg_file.write(os.linesep + "{")
+    nfg_file.write("\n{")
 
 
 def close_nfg_section(nfg_file):
@@ -17,12 +16,12 @@ def close_nfg_section(nfg_file):
 def register_profile_payoff(nfg_file, profile_name, payoffs):
     payoff_strings = [str(payoff) for payoff in payoffs]
     payoff_line = '{ "' + profile_name + '" ' + ",".join(payoff_strings) + " }"
-    nfg_file.write(payoff_line + os.linesep)
+    nfg_file.write(payoff_line + "\n")
 
 
 def write_profile_ordering(nfg_file, profile_ordering):
     profile_ordering = " ".join(profile_ordering)
-    nfg_file.write(os.linesep + profile_ordering)
+    nfg_file.write("\n" + profile_ordering)
 
 
 def start_nfg_file(game_description, strategies_catalogues):
@@ -42,7 +41,7 @@ def start_nfg_file(game_description, strategies_catalogues):
 
         for strategy_catalogue in strategies_catalogues:
             actions = " ".join(['"' + strategy + '"' for strategy in strategy_catalogue])
-            nfg_file.write("{ " + actions + " }" + os.linesep)
+            nfg_file.write("{ " + actions + " }\n")
 
         close_nfg_section(nfg_file)
 
