@@ -2,7 +2,10 @@ import logging
 import subprocess
 from string import Template
 
-DEFAULT_PROCESS = "/Applications/Gambit.app/Contents/MacOS/gambit-enumpure"
+GAMBIT_DIR = "/Applications/Gambit.app/Contents/MacOS/"
+
+ALL_EQUILIBRIA = "gambit-enumpoly"
+PURE_EQUILIBRIA = "gambit-enumpure"
 
 
 def start_nfg_section(nfg_file):
@@ -96,16 +99,18 @@ def get_strategic_game_format(game_desc, strategies_catalogues, profile_payoffs)
     return file_name
 
 
-def calculate_equilibrium(strategy_catalogues, gambit_file, gambit_process=DEFAULT_PROCESS):
+def calculate_equilibrium(strategy_catalogues, gambit_file, tool=PURE_EQUILIBRIA):
     """
     Executes Gambit for equilibrium calculation.
-    :param gambit_process: Gambit solver to use
+    :param tool: Gambit solver to use
     :param strategy_catalogues: Catalog of available strategies.
     :param gambit_file:
     :return: List of equilibrium profiles.
     """
 
     no_banner_option = "-q"
+    gambit_process = GAMBIT_DIR + tool
+
     command_line = [gambit_process, no_banner_option, gambit_file]
     logging.info("Starting equilibrium calculation using: " + gambit_process)
 

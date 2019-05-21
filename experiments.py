@@ -26,11 +26,11 @@ def do_allpay_experiments():
     # player_valuations = range(0, 3)
     # player_valuations = range(0, 6)
 
-    player_valuations = range(0, 8)
+    player_valuations = range(0, 7)
 
     start_time = time.time()
 
-    for no_jumps in [True, False]:
+    for no_jumps in [False]:
         for no_ties in [False, True]:
             run_allpay(player_valuations, no_jumps, no_ties)
 
@@ -52,7 +52,7 @@ def run_allpay(player_valuations, no_jumps, no_ties):
                                                no_ties=no_ties)
 
     logging.info("Running: " + game_name)
-    another_sample_auction.calculate_equilibria()
+    another_sample_auction.calculate_equilibria(only_pure=False)
 
 
 def do_gnuth_experiments():

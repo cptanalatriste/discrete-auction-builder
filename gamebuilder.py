@@ -140,10 +140,16 @@ class BayesianGame(ABC):
 
         return file_name, strategy_catalogues
 
-    def calculate_equilibria(self):
+    def calculate_equilibria(self, only_pure=True):
         logging.info("Starting equilibrium calculation ...")
         nfg_file, strategy_catalogues = self.to_nfg_file()
         logging.info("Gambit file generated at " + nfg_file)
 
+        tool = gambitutils.PURE_EQUILIBRIA
+
+        if not only_pure:
+            tool = gambitutils.ALL_EQUILIBRIA
+
         return gambitutils.calculate_equilibrium(gambit_file=nfg_file,
-                                                 strategy_catalogues=strategy_catalogues)
+                                                 strategy_catalogues=strategy_catalogues,
+                                                 tool=tool)
