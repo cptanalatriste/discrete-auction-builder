@@ -28,17 +28,32 @@ def do_allpay_experiments():
     # player_valuations = range(0, 7)
     # player_valuations = range(0, 8)
 
+    all_pay = True
     start_time = time.time()
 
     for no_jumps in [False]:
         for no_ties in [False, True]:
-            run_allpay(player_valuations, no_jumps, no_ties)
+            run_first_price(player_valuations, no_jumps, no_ties, all_pay, only_pure=False)
 
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 
 
-def run_allpay(player_valuations, no_jumps, no_ties):
-    game_name = "allpay_noties_" + str(no_ties) + "_nojumps_" + str(no_jumps) + "_" + str(
+def do_first_price_experiments():
+    player_valuations = range(0, 3)
+
+    start_time = time.time()
+
+    no_jumps = False
+    no_ties = False
+    all_pay = False
+
+    run_first_price(player_valuations, no_jumps, no_ties, all_pay)
+
+    logging.info("--- %s seconds ---" % (time.time() - start_time))
+
+
+def run_first_price(player_valuations, no_jumps, no_ties, all_pay, only_pure=True):
+    game_name = "allpay" + str(all_pay) + "_noties_" + str(no_ties) + "_nojumps_" + str(no_jumps) + "_" + str(
         len(player_valuations)) + "_valuations_auction"
 
     player_specification = AuctionPlayerSpecification(player_actions=player_valuations, player_types=player_valuations,
@@ -48,11 +63,11 @@ def run_allpay(player_valuations, no_jumps, no_ties):
 
     another_sample_auction = FirstPriceAuction(game_name=game_name,
                                                player_specification=player_specification,
-                                               opponent_specification=opponent_specification, all_pay=True,
+                                               opponent_specification=opponent_specification, all_pay=all_pay,
                                                no_ties=no_ties)
 
     logging.info("Running: " + game_name)
-    another_sample_auction.calculate_equilibria(only_pure=False)
+    another_sample_auction.calculate_equilibria(only_pure)
 
 
 def do_gnuth_experiments():
@@ -88,4 +103,5 @@ def do_gnuth_experiments():
 
 
 if __name__ == "__main__":
-    do_allpay_experiments()
+    # do_allpay_experiments()
+    do_first_price_experiments()
