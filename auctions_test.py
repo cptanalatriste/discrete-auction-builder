@@ -64,7 +64,7 @@ class GnuthAuctionTest(unittest.TestCase):
         self.assertAlmostEqual(actual_weak_utility, expected_weak_utility)
 
     def test_calculate_equilibria(self):
-        actual_equilibria = self.sample_auction.calculate_equilibria()
+        actual_equilibria = self.sample_auction.calculate_equilibria(only_pure=True)
         self.assertEqual(len(actual_equilibria), 2)
 
         for equilibrium in actual_equilibria:

@@ -1,5 +1,6 @@
 import logging
 import subprocess
+import time
 from string import Template
 
 GAMBIT_DIR = "/Applications/Gambit.app/Contents/MacOS/"
@@ -117,13 +118,19 @@ def calculate_equilibrium(strategy_catalogues, gambit_file, tool=PURE_EQUILIBRIA
     solver_process = subprocess.Popen(command_line, stdout=subprocess.PIPE)
 
     nash_equilibrium_strings = []
+    logging.info("Command-line output: Start")
     while True:
         line = solver_process.stdout.readline().decode()
+        logging.info(line)
         if line != '':
             nash_equilibrium_strings.append(line)
         else:
             break
 
+    while solver_process.poll() is None:
+        time.sleep(0.5)
+
+    logging.info("Command-line output: Return Code " + str(solver_process.returncode))
     start_index = 3
 
     if len(nash_equilibrium_strings) == 0:
