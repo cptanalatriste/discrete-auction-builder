@@ -53,7 +53,7 @@ def do_first_price_experiments():
 
 
 def run_first_price(player_valuations, no_jumps, no_ties, all_pay, only_pure=True):
-    game_name = "allpay" + str(all_pay) + "_noties_" + str(no_ties) + "_nojumps_" + str(no_jumps) + "_" + str(
+    game_name = "allpay_" + str(all_pay) + "_noties_" + str(no_ties) + "_nojumps_" + str(no_jumps) + "_" + str(
         len(player_valuations)) + "_valuations_auction"
 
     player_specification = AuctionPlayerSpecification(player_actions=player_valuations, player_types=player_valuations,
