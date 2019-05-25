@@ -24,22 +24,26 @@ def do_pezanis_experiments():
 
 def do_allpay_experiments():
     # player_valuations = range(0, 3)
-    player_valuations = range(0, 6)
+    player_valuations = range(0, 5)
+    # player_valuations = range(0, 6)
     # player_valuations = range(0, 7)
     # player_valuations = range(0, 8)
 
     all_pay = True
+    only_pure = False
     start_time = time.time()
 
     for no_jumps in [False]:
         for no_ties in [False, True]:
-            run_first_price(player_valuations, no_jumps, no_ties, all_pay, only_pure=False)
+            run_first_price(player_valuations, no_jumps, no_ties, all_pay, only_pure=only_pure)
 
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 
 
 def do_first_price_experiments():
-    player_valuations = range(0, 3)
+    # player_valuations = range(0, 3)
+    # player_valuations = range(0, 5)
+    player_valuations = range(0, 7)
 
     start_time = time.time()
 
@@ -103,5 +107,5 @@ def do_gnuth_experiments():
 
 
 if __name__ == "__main__":
-    # do_allpay_experiments()
-    do_first_price_experiments()
+    do_allpay_experiments()
+    # do_first_price_experiments()

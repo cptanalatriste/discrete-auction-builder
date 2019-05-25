@@ -115,57 +115,54 @@ def calculate_equilibrium(strategy_catalogues, gambit_file, tool=PURE_EQUILIBRIA
     command_line = [gambit_process, no_banner_option, gambit_file]
     logging.info("Starting equilibrium calculation using: " + gambit_process)
 
-    solver_process = subprocess.Popen(command_line, stdout=subprocess.PIPE)
-
-    nash_equilibrium_strings = []
-    logging.info("Command-line output: Start")
-    while True:
-        line = solver_process.stdout.readline().decode()
-        logging.info(line)
-        if line != '':
-            nash_equilibrium_strings.append(line)
-        else:
-            break
-
-    while solver_process.poll() is None:
-        time.sleep(0.5)
+    solver_process = subprocess.Popen(command_line, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = solver_process.communicate()
 
     logging.info("Command-line output: Return Code " + str(solver_process.returncode))
-    start_index = 3
+    if solver_process.returncode == 0:
+        logging.info("Command-line output: " + str(out))
 
-    if len(nash_equilibrium_strings) == 0:
-        logging.warning("NO EQUILIBRIA WAS FOUND FOR GAME " + gambit_file)
+        nash_equilibrium_strings = str(out.decode()).splitlines()
+        if len(nash_equilibrium_strings) == 0:
+            logging.warning("NO EQUILIBRIA WAS FOUND FOR GAME " + gambit_file)
 
-    equilibrium_list = []
-    for index, nash_equilibrium in enumerate(nash_equilibrium_strings):
+        equilibrium_list = []
 
-        logging.info("Equilibrium " + str(index + 1) + " of " + str(len(nash_equilibrium_strings)))
+        start_index = 3
+        for index, nash_equilibrium in enumerate(nash_equilibrium_strings):
 
-        nash_equilibrium = nash_equilibrium.strip()
-        nash_equilibrium = nash_equilibrium[start_index:].split(",")
+            logging.info("Equilibrium " + str(index + 1) + " of " + str(len(nash_equilibrium_strings)))
 
-        player_index = 0
-        strategy_index = 0
+            nash_equilibrium = nash_equilibrium.strip()
+            nash_equilibrium = nash_equilibrium[start_index:].split(",")
 
-        equilibrium_profile = {}
-        for probability in nash_equilibrium:
+            player_index = 0
+            strategy_index = 0
 
-            strategies_catalog = strategy_catalogues[player_index]
-            strategy_name = strategies_catalog[strategy_index]
+            equilibrium_profile = {}
+            for probability in nash_equilibrium:
 
-            if float(probability) > 0.0:
-                logging.info(
-                    "Player " + str(player_index) + "-> Strategy: " + str(strategy_name) + " \t\tProbability " + str(
-                        probability))
+                strategies_catalog = strategy_catalogues[player_index]
+                strategy_name = strategies_catalog[strategy_index]
 
-            equilibrium_profile[(player_index, strategy_index)] = probability
+                if float(probability) > 0.0:
+                    logging.info(
+                        "Player " + str(player_index) + "-> Strategy: " + str(
+                            strategy_name) + " \t\tProbability " + str(
+                            probability))
 
-            if strategy_index < len(strategies_catalog) - 1:
-                strategy_index += 1
-            else:
-                player_index += 1
-                strategy_index = 0
+                equilibrium_profile[(player_index, strategy_index)] = probability
 
-        equilibrium_list.append(equilibrium_profile)
+                if strategy_index < len(strategies_catalog) - 1:
+                    strategy_index += 1
+                else:
+                    player_index += 1
+                    strategy_index = 0
+
+            equilibrium_list.append(equilibrium_profile)
+
+    else:
+        logging.error("ERROR WHILE PROCESSING FILE: " + gambit_file + " . Error: " + str(err))
+        return
 
     return equilibrium_list
