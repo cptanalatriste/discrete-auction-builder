@@ -117,8 +117,11 @@ class BayesianGame(ABC):
 
             gambitutils.start_nfg_section(nfg_file)
 
-            cell_iterator = itertools.product(*player_strategies)
-            for index, profile in enumerate(cell_iterator):
+            # This is a hack to make the file match Gambit format
+            cell_iterator = itertools.product(*reversed(player_strategies))
+            for index, reversed_profile in enumerate(cell_iterator):
+
+                profile = tuple(reversed(reversed_profile))
                 payoffs = self.get_expected_utilities(profile)
 
                 profile_name = ""

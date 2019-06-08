@@ -2,6 +2,8 @@ import itertools
 import logging
 from fractions import Fraction
 import networkx as nx
+from functools import reduce
+import operator
 
 from gamebuilder import BayesianGame, PlayerSpecification
 
@@ -10,35 +12,40 @@ logging.basicConfig(level=logging.INFO)
 
 class FirstPriceAuction(BayesianGame):
 
-    def __init__(self, game_name, player_specification, opponent_specification, all_pay=False, no_ties=False):
+    def __init__(self, game_name, player_specifications, all_pay=False, no_ties=False):
 
         self.all_pay = all_pay
         self.no_ties = no_ties
 
         super(FirstPriceAuction, self).__init__(
             game_name=game_name,
-            player_specification=player_specification,
-            opponent_specification=opponent_specification)
+            player_specifications=player_specifications)
 
-    def get_types_probability(self, player_type, opponent_type):
-        return Fraction(1, len(self.player_specification.player_types) * len(self.opponent_specification.player_types))
+    def get_types_probability(self, player_types):
+        return Fraction(1, reduce(operator.mul, [len(player_specification.player_types) for player_specification in
+                                                 self.player_specifications]))
 
-    def get_utility(self, player_type, player_strategy, opponent_type, opponnet_strategy):
-        player_type_index = self.player_specification.get_type_index(player_type)
-        player_bid = player_strategy[player_type_index]
+    def get_utility(self, player_types, strategy_profile):
 
-        opponent_type_index = self.opponent_specification.get_type_index(opponent_type)
-        opponent_bid = opponnet_strategy[opponent_type_index]
+        player_bids = [player_strategy[player_specification.get_type_index(player_type)] for
+                       player_type, player_strategy, player_specification in
+                       zip(player_types, strategy_profile, self.player_specifications)]
 
-        if player_bid > opponent_bid:
-            return self.player_victory_utilities(player_type=player_type, player_bid=player_bid,
-                                                 opponent_bid=opponent_bid)
-        elif opponent_bid > player_bid:
-            return self.opponent_victory_utilities(player_bid=player_bid, opponent_type=opponent_type,
-                                                   opponent_bid=opponent_bid)
-        else:
-            return self.get_tie_utilities(player_type=player_type, player_bid=player_bid, opponent_type=opponent_type,
-                                          opponent_bid=opponent_bid)
+        max_bid = max(player_bids)
+        winners = [player_index for player_index, player_bid in enumerate(player_bids) if player_bid == max_bid]
+
+        utilities = [0.0 for _ in range(self.num_players)]
+        num_winners = len(winners)
+        for player_index, player_type, player_bid in zip(range(self.num_players), player_types, player_bids):
+
+            if num_winners == 1 and player_index in winners:
+                utilities[player_index] = self.get_winning_utility(player_type, player_bid)
+            elif num_winners > 1 and player_index in winners:
+                utilities[player_index] = self.get_tie_utility(player_type, player_bid, num_winners)
+            else:
+                utilities[player_index] = self.get_losing_utility(player_bid)
+
+        return utilities
 
     @staticmethod
     def get_winning_utility(player_type, player_bid):
@@ -53,20 +60,15 @@ class FirstPriceAuction(BayesianGame):
 
         return loser_utility
 
-    def player_victory_utilities(self, player_type, player_bid, opponent_bid):
-        return self.get_winning_utility(player_type, player_bid), self.get_losing_utility(opponent_bid)
-
-    def opponent_victory_utilities(self, player_bid, opponent_type, opponent_bid):
-        return self.get_losing_utility(player_bid), self.get_winning_utility(opponent_type, opponent_bid)
-
-    def get_tie_utilities(self, player_type, player_bid, opponent_type, opponent_bid):
+    def get_tie_utility(self, player_type, player_bid, num_winners):
 
         if self.no_ties:
-            return self.get_losing_utility(player_bid), self.get_losing_utility(opponent_bid)
+            return self.get_losing_utility(player_bid)
         else:
-            return Fraction(self.get_losing_utility(player_bid) + self.get_winning_utility(player_type, player_bid),
-                            2), Fraction(
-                self.get_losing_utility(opponent_bid) + self.get_winning_utility(opponent_type, opponent_bid), 2)
+
+            return Fraction((num_winners - 1) * self.get_losing_utility(player_bid),
+                            num_winners) + Fraction(
+                self.get_winning_utility(player_type, player_bid), num_winners)
 
 
 class AuctionPlayerSpecification(PlayerSpecification):
