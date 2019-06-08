@@ -24,8 +24,8 @@ def do_pezanis_experiments():
 
 def do_allpay_experiments():
     # player_valuations = range(0, 3)
-    player_valuations = range(0, 5)
-    # player_valuations = range(0, 6)
+    # player_valuations = range(0, 5)
+    player_valuations = range(0, 6)
     # player_valuations = range(0, 7)
     # player_valuations = range(0, 8)
 
@@ -44,12 +44,16 @@ def do_first_price_experiments():
     # player_valuations = range(0, 3)
     # player_valuations = range(0, 5)
     player_valuations = range(0, 7)
+    player_valuations = range(0, 11)
 
     start_time = time.time()
 
-    no_jumps = False
+    # no_jumps = False
     no_ties = False
     all_pay = False
+
+    no_jumps = True
+
 
     run_first_price(player_valuations, no_jumps, no_ties, all_pay)
 

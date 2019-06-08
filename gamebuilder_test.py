@@ -10,12 +10,14 @@ class SampleGame(BayesianGame):
     """
 
     def __init__(self):
+        player_specification = PlayerSpecification(player_types=[1, 2], player_actions=["U", "D"])
+        opponent_specification = PlayerSpecification(player_types=[1, 2],
+                                                     player_actions=["R",
+                                                                     "L"])
+
         super(SampleGame, self).__init__(
             game_name="Sample_Game",
-            player_specification=PlayerSpecification(player_types=[1, 2], player_actions=["U", "D"]),
-            opponent_specification=PlayerSpecification(player_types=[1, 2],
-                                                       player_actions=["R",
-                                                                       "L"]))
+            player_specifications=[player_specification, opponent_specification])
 
         self.type_probability = {(1, 1): .3,
                                  (1, 2): .1,
@@ -39,14 +41,17 @@ class SampleGame(BayesianGame):
                                (2, "D", 1, "R"): (1, 1),
                                (2, "D", 2, "R"): (1, 2)}
 
-    def get_types_probability(self, player_type, opponent_type):
-        return self.type_probability[(player_type, opponent_type)]
+    def get_types_probability(self, player_types):
+        return self.type_probability[player_types]
 
-    def get_utility(self, player_type, player_strategy, opponent_type, opponent_strategy):
-        player_type_index = self.player_specification.get_type_index(player_type)
+    def get_utility(self, player_types, strategy_profile):
+        player_type, opponent_type = player_types
+        player_strategy, opponent_strategy = strategy_profile
+
+        player_type_index = self.player_specifications[0].get_type_index(player_type)
         player_action = player_strategy[player_type_index]
 
-        opponent_type_index = self.opponent_specification.get_type_index(opponent_type)
+        opponent_type_index = self.player_specifications[1].get_type_index(opponent_type)
         opponent_action = opponent_strategy[opponent_type_index]
 
         return self.utility_values[(player_type, player_action, opponent_type, opponent_action)]
@@ -58,14 +63,17 @@ class BayesianGameTest(unittest.TestCase):
         super(BayesianGameTest, self).__init__(*args, **kwargs)
         self.sample_game = SampleGame()
 
+        self.player_specification = self.sample_game.player_specifications[0]
+        self.opponent_specification = self.sample_game.player_specifications[1]
+
     def test_pure_strategies(self):
         expected_strategies = [("U", "U"), ("U", "D"), ("D", "U"), ("D", "D")]
-        actual_strategies = list(self.sample_game.player_specification.get_pure_strategies())
+        actual_strategies = list(self.player_specification.get_pure_strategies())
 
         self.assertEqual(actual_strategies, expected_strategies)
 
         expected_strategies = [("R", "R"), ("R", "L"), ("L", "R"), ("L", "L")]
-        actual_strategies = list(self.sample_game.opponent_specification.get_pure_strategies())
+        actual_strategies = list(self.opponent_specification.get_pure_strategies())
         self.assertEqual(actual_strategies, expected_strategies)
 
     def test_get_utility(self):

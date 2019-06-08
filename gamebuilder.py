@@ -1,5 +1,7 @@
 import itertools
+import operator
 import logging
+from functools import reduce
 from abc import ABC, abstractmethod
 from tqdm import tqdm
 
@@ -48,66 +50,66 @@ class PlayerSpecification(object):
 
 class BayesianGame(ABC):
 
-    def __init__(self, game_name, player_specification, opponent_specification):
+    def __init__(self, game_name, player_specifications):
         self.game_name = game_name
-        self.player_specification = player_specification
-        self.opponent_specification = opponent_specification
-        self.num_players = 2
+        self.player_specifications = player_specifications
+        self.num_players = len(player_specifications)
 
     def get_expected_utilities(self, strategy_profile):
-        player_strategy, opponent_strategy = strategy_profile
-        types_iterator = ((player_type, opponent_type) for player_type in self.player_specification.player_types for
-                          opponent_type in self.opponent_specification.player_types)
 
-        expected_player_utility, expected_opponent_utility = 0, 0
-        for player_type, opponent_type in types_iterator:
-            probability = self.get_types_probability(player_type, opponent_type)
-            player_utility, opponent_utility = self.get_utility(player_type, player_strategy, opponent_type,
-                                                                opponent_strategy)
+        types_iterator = itertools.product(
+            *[player_specification.player_types for player_specification in self.player_specifications])
 
-            expected_player_utility += probability * player_utility
-            expected_opponent_utility += probability * opponent_utility
+        expected_player_utilities = [0 for _ in range(self.num_players)]
 
-        return expected_player_utility, expected_opponent_utility
+        for player_types in types_iterator:
+            probability = self.get_types_probability(player_types)
+            player_utilities = self.get_utility(player_types, strategy_profile)
+
+            expected_player_utilities = [previous_value + probability * current_value for previous_value, current_value
+                                         in
+                                         zip(expected_player_utilities, player_utilities)]
+
+        return expected_player_utilities
 
     @abstractmethod
-    def get_types_probability(self, player_type, opponent_type):
+    def get_types_probability(self, player_types):
         pass
 
     @abstractmethod
-    def get_utility(self, player_type, player_strategy, opponent_type, opponnet_strategy):
+    def get_utility(self, player_types, strategy_profile):
         pass
 
     def get_strategy_catalogues(self):
-        strategies_catalogues = [self.player_specification.get_strategy_catalogue(),
-                                 self.opponent_specification.get_strategy_catalogue()]
+        strategies_catalogues = [player_specification.get_strategy_catalogue() for player_specification in
+                                 self.player_specifications]
 
         return strategies_catalogues
 
     def get_number_of_entries(self):
-        if self.player_specification.get_num_strategies() and self.opponent_specification.get_num_strategies():
-            return self.player_specification.get_num_strategies() * self.opponent_specification.get_num_strategies()
+
+        num_strategies = [player_specification.get_num_strategies() for player_specification in
+                          self.player_specifications if player_specification.get_num_strategies()]
+
+        if len(num_strategies) > 0:
+            return reduce(operator.mul, num_strategies)
 
     def to_nfg_file(self):
-        logging.info("Obtaining strategies for the strong bidder")
-        player_strategies = self.player_specification.get_strategy_catalogue()
-
-        logging.info("Obtaining strategies for the weak bidder")
-        opponent_strategies = self.opponent_specification.get_strategy_catalogue()
+        logging.info("Obtaining strategies for all players")
+        player_strategies = [player_specification.get_strategy_catalogue() for player_specification in
+                             self.player_specifications]
 
         profile_ordering = []
 
-        player_strategy_catalogue = [self.player_specification.get_strategy_description(player_strategy) for
-                                     player_strategy in player_strategies]
-        opponent_strategy_catalogue = [self.opponent_specification.get_strategy_description(opponent_strategy) for
-                                       opponent_strategy in opponent_strategies]
+        strategy_catalogues = [
+            [player_specification.get_strategy_description(player_strategy) for player_strategy in strategy_list] for
+            strategy_list, player_specification in zip(player_strategies, self.player_specifications)]
 
-        strategy_catalogues = [player_strategy_catalogue, opponent_strategy_catalogue]
         file_name = gambitutils.start_nfg_file(self.game_name, strategy_catalogues)
 
         cell_entries = self.get_number_of_entries()
         if cell_entries is None:
-            cell_entries = len(player_strategies) * len(opponent_strategies)
+            cell_entries = reduce(operator.mul, [len(strategy_list) for strategy_list in player_strategies])
 
         logging.info("File " + file_name + " created. Starting appending payoff values ...")
         logging.info("Writing payoff values for " + str(cell_entries) + " entries ...")
@@ -115,15 +117,19 @@ class BayesianGame(ABC):
 
             gambitutils.start_nfg_section(nfg_file)
 
-            cell_iterator = itertools.product(opponent_strategies, player_strategies)
+            cell_iterator = itertools.product(*player_strategies)
             for index, profile in enumerate(cell_iterator):
-                opponent_strategy, player_strategy = profile
-                payoffs = self.get_expected_utilities((player_strategy, opponent_strategy))
+                payoffs = self.get_expected_utilities(profile)
 
-                player_strategy_desc = player_strategy_catalogue[player_strategies.index(player_strategy)]
-                opponent_strategy_desc = opponent_strategy_catalogue[opponent_strategies.index(opponent_strategy)]
+                profile_name = ""
 
-                profile_name = "P1_" + player_strategy_desc + "_P2_" + opponent_strategy_desc
+                for player_index in range(self.num_players):
+                    player_strategy = profile[player_index]
+                    strategy_catalogue = strategy_catalogues[player_index]
+                    strategy_list = player_strategies[player_index]
+
+                    profile_name += "P" + str(player_index) + strategy_catalogue[strategy_list.index(player_strategy)]
+
                 logging.debug("Profile: " + profile_name + " Payoffs: " + str(payoffs))
                 gambitutils.register_profile_payoff(nfg_file, profile_name, payoffs)
 
