@@ -91,21 +91,21 @@ class FirstPriceAuctionTest(unittest.TestCase):
                                                                  player_types=player_valuations, no_jumps=False)
 
         self.all_pay_auction = FirstPriceAuction(game_name="allpay_auction",
-                                                 player_specification=self.player_specification,
-                                                 opponent_specification=self.opponent_specification, all_pay=True,
+                                                 player_specifications=[self.player_specification,
+                                                                        self.opponent_specification], all_pay=True,
                                                  no_ties=False)
 
         self.first_price_auction = FirstPriceAuction(game_name="first_price_auction",
-                                                     player_specification=self.player_specification,
-                                                     opponent_specification=self.opponent_specification, all_pay=False,
+                                                     player_specifications=[self.player_specification,
+                                                                            self.opponent_specification], all_pay=False,
                                                      no_ties=False)
 
     def test_pure_strategies(self):
         expected_strategies = [(0, 0, 0), (0, 0, 1), (0, 0, 2), (0, 1, 1), (0, 1, 2)]
-        player_strategies = list(self.all_pay_auction.player_specification.get_pure_strategies())
+        player_strategies = list(self.player_specification.get_pure_strategies())
         self.assertEqual(sorted(expected_strategies), sorted(player_strategies))
 
-        opponent_strategies = list(self.all_pay_auction.opponent_specification.get_pure_strategies())
+        opponent_strategies = list(self.opponent_specification.get_pure_strategies())
         self.assertEqual(sorted(opponent_strategies), sorted(player_strategies))
 
     def test_first_price_utilities(self):
@@ -192,8 +192,8 @@ class FirstPriceAuctionTest(unittest.TestCase):
 
     def test_noties_utilities(self):
         another_sample_auction = FirstPriceAuction(game_name="noties_auction",
-                                                   player_specification=self.player_specification,
-                                                   opponent_specification=self.opponent_specification, all_pay=True,
+                                                   player_specifications=[self.player_specification,
+                                                                          self.opponent_specification], all_pay=True,
                                                    no_ties=True)
 
         expected_player_utility = 0
@@ -242,19 +242,23 @@ class PezanisAuctionTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(PezanisAuctionTest, self).__init__(*args, **kwargs)
 
-        self.sample_auction = PezanisAuction(game_name="pezanis_auction", player_valuations=[0, 1, 2],
-                                             opponent_valuations=[-6, -5, -4, -3, -2, -1, 0, 1, 2])
+        self.sample_auction = PezanisAuction(game_name="pezanis_auction", player_valuations=[[0, 1, 2],
+                                                                                             [-6, -5, -4, -3, -2, -1, 0,
+                                                                                              1, 2]])
+        self.player_specification = self.sample_auction.player_specifications[0]
+        self.opponent_specification = self.sample_auction.player_specifications[1]
 
     def test_no_jumpy_strategies(self):
-        another_sample_auction = PezanisAuction(game_name="pezanis_auction", player_valuations=[0, 1, 2],
-                                                opponent_valuations=[-6, -5, -4, -3, -2, -1, 0, 1, 2],
+        another_sample_auction = PezanisAuction(game_name="pezanis_auction", player_valuations=[[0, 1, 2],
+                                                                                                [-6, -5, -4, -3, -2, -1,
+                                                                                                 0, 1, 2]],
                                                 no_jumps=True)
 
         expected_strategies = [(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 2)]
-        player_strategies = list(another_sample_auction.player_specification.get_pure_strategies())
+        player_strategies = list(another_sample_auction.player_specifications[0].get_pure_strategies())
         self.assertEqual(sorted(expected_strategies), sorted(player_strategies))
 
-        opponent_strategies = list(another_sample_auction.opponent_specification.get_pure_strategies())
+        opponent_strategies = list(another_sample_auction.player_specifications[1].get_pure_strategies())
         self.assertEqual(sorted(opponent_strategies), sorted(player_strategies))
 
     def test_auction_utilities(self):
@@ -293,8 +297,8 @@ class PezanisAuctionTest(unittest.TestCase):
 
     def test_pure_strategies(self):
         expected_strategies = [(0, 0, 0), (0, 0, 1), (0, 0, 2), (0, 1, 1), (0, 1, 2)]
-        player_strategies = list(self.sample_auction.player_specification.get_pure_strategies())
+        player_strategies = list(self.player_specification.get_pure_strategies())
         self.assertEqual(sorted(expected_strategies), sorted(player_strategies))
 
-        opponent_strategies = list(self.sample_auction.opponent_specification.get_pure_strategies())
+        opponent_strategies = list(self.opponent_specification.get_pure_strategies())
         self.assertEqual(sorted(opponent_strategies), sorted(player_strategies))

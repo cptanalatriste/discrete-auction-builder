@@ -25,13 +25,16 @@ class FirstPriceAuction(BayesianGame):
         return Fraction(1, reduce(operator.mul, [len(player_specification.player_types) for player_specification in
                                                  self.player_specifications]))
 
+    def get_player_bids(self, player_types, strategy_profile):
+        return [player_strategy[player_specification.get_type_index(player_type)] for
+                player_type, player_strategy, player_specification in
+                zip(player_types, strategy_profile, self.player_specifications)]
+
     def get_utility(self, player_types, strategy_profile):
 
-        player_bids = [player_strategy[player_specification.get_type_index(player_type)] for
-                       player_type, player_strategy, player_specification in
-                       zip(player_types, strategy_profile, self.player_specifications)]
+        player_bids = self.get_player_bids(player_types, strategy_profile)
 
-        max_bid = max(player_bids)
+        max_bid = max([bid for bid in player_bids if bid is not None])
         winners = [player_index for player_index, player_bid in enumerate(player_bids) if player_bid == max_bid]
 
         utilities = [0.0 for _ in range(self.num_players)]
@@ -181,42 +184,26 @@ class PezanisPlayerSpecification(AuctionPlayerSpecification):
 
 
 class PezanisAuction(FirstPriceAuction):
-    def __init__(self, game_name, player_valuations, opponent_valuations, no_jumps=False):
-        player_specification = PezanisPlayerSpecification(player_valuations=player_valuations, no_jumps=no_jumps)
-        opponent_specification = PezanisPlayerSpecification(player_valuations=opponent_valuations, no_jumps=no_jumps)
+    def __init__(self, game_name, player_valuations, no_jumps=False):
+
+        player_specifications = [PezanisPlayerSpecification(player_valuations=valuations, no_jumps=no_jumps) for
+                                 valuations in player_valuations]
 
         super(PezanisAuction, self).__init__(
             game_name=game_name,
-            player_specification=player_specification,
-            opponent_specification=opponent_specification)
+            player_specifications=player_specifications)
 
     def get_number_of_entries(self):
         pass
 
-    def get_utility(self, player_type, player_strategy, opponent_type, opponnet_strategy):
+    def get_player_bids(self, player_types, strategy_profile):
 
-        player_bid = None
-        if player_type >= 0:
-            player_type_index = self.player_specification.get_action_index(player_type)
-            player_bid = player_strategy[player_type_index]
+        bids = [None for _ in range(self.num_players)]
 
-        opponent_bid = None
-        if opponent_type >= 0:
-            opponent_type_index = self.opponent_specification.get_action_index(opponent_type)
-            opponent_bid = opponnet_strategy[opponent_type_index]
+        for player_index, player_type, player_strategy, player_specification in zip(range(self.num_players),
+                                                                                    player_types, strategy_profile,
+                                                                                    self.player_specifications):
+            if player_type >= 0:
+                bids[player_index] = player_strategy[player_specification.get_action_index(player_type)]
 
-        if player_bid is None and opponent_bid is not None:
-            return self.opponent_victory_utilities(player_bid=player_bid, opponent_type=opponent_type,
-                                                   opponent_bid=opponent_bid)
-        elif player_bid is not None and opponent_bid is None:
-            return self.player_victory_utilities(player_type=player_type, player_bid=player_bid,
-                                                 opponent_bid=opponent_bid)
-        elif player_bid > opponent_bid:
-            return self.player_victory_utilities(player_type=player_type, player_bid=player_bid,
-                                                 opponent_bid=opponent_bid)
-        elif opponent_bid > player_bid:
-            return self.opponent_victory_utilities(player_bid=player_bid, opponent_type=opponent_type,
-                                                   opponent_bid=opponent_bid)
-        else:
-            return self.get_tie_utilities(player_type=player_type, player_bid=player_bid, opponent_type=opponent_type,
-                                          opponent_bid=opponent_bid)
+        return bids
