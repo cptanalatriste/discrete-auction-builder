@@ -66,6 +66,9 @@ class BayesianGame(ABC):
             probability = self.get_types_probability(player_types)
             player_utilities = self.get_utility(player_types, strategy_profile)
 
+            logging.debug("player_types", player_types, "strategy_profile", strategy_profile, "player_utilities",
+                          player_utilities)
+
             expected_player_utilities = [previous_value + probability * current_value for previous_value, current_value
                                          in
                                          zip(expected_player_utilities, player_utilities)]

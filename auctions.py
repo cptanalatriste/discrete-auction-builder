@@ -81,6 +81,12 @@ class AuctionPlayerSpecification(PlayerSpecification):
         super(AuctionPlayerSpecification, self).__init__(player_types=player_types,
                                                          player_actions=player_actions)
 
+    @classmethod
+    def from_specification(cls, player_specification):
+        return cls(player_types=player_specification.player_types,
+                   player_actions=player_specification.player_actions,
+                   no_jumps=player_specification.no_jumps)
+
     def get_num_strategies(self):
         pass
 
