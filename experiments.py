@@ -40,38 +40,54 @@ def do_allpay_experiments():
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 
 
-def do_first_price_experiments():
+def do_three_bidders_experiments():
     # player_valuations = range(0, 3)
-    # player_valuations = range(0, 5)
+    # player_valuations = range(0, 4)
+    # player_valuations = range(0, 6)
     player_valuations = range(0, 7)
-    player_valuations = range(0, 11)
 
     start_time = time.time()
 
-    # no_jumps = False
+    no_jumps = False
+    no_ties = True
+    all_pay = False
+    num_players = 3
+
+    run_first_price(num_players=num_players, player_valuations=player_valuations, no_jumps=no_jumps, no_ties=no_ties,
+                    all_pay=all_pay)
+    logging.info("--- %s seconds ---" % (time.time() - start_time))
+
+
+def do_first_price_experiments():
+    # player_valuations = range(0, 3)
+    # player_valuations = range(0, 5)
+    # player_valuations = range(0, 7)
+    player_valuations = range(0, 9)
+    # player_valuations = range(0, 11)
+
+    start_time = time.time()
+
+    # no_jumps = True
+    no_jumps = False
     no_ties = False
     all_pay = False
-
-    no_jumps = True
-
 
     run_first_price(player_valuations, no_jumps, no_ties, all_pay)
 
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 
 
-def run_first_price(player_valuations, no_jumps, no_ties, all_pay, only_pure=True):
-    game_name = "allpay_" + str(all_pay) + "_noties_" + str(no_ties) + "_nojumps_" + str(no_jumps) + "_" + str(
+def run_first_price(player_valuations, no_jumps, no_ties, all_pay, only_pure=True, num_players=2):
+    game_name = "num_players_" + str(num_players) + "_allpay_" + str(all_pay) + "_noties_" + str(
+        no_ties) + "_nojumps_" + str(no_jumps) + "_" + str(
         len(player_valuations)) + "_valuations_auction"
 
-    player_specification = AuctionPlayerSpecification(player_actions=player_valuations, player_types=player_valuations,
-                                                      no_jumps=no_jumps)
-    opponent_specification = AuctionPlayerSpecification(player_actions=player_valuations,
-                                                        player_types=player_valuations, no_jumps=no_jumps)
+    player_specifications = [
+        AuctionPlayerSpecification(player_actions=player_valuations, player_types=player_valuations,
+                                   no_jumps=no_jumps) for _ in range(num_players)]
 
     another_sample_auction = FirstPriceAuction(game_name=game_name,
-                                               player_specification=player_specification,
-                                               opponent_specification=opponent_specification, all_pay=all_pay,
+                                               player_specifications=player_specifications, all_pay=all_pay,
                                                no_ties=no_ties)
 
     logging.info("Running: " + game_name)
@@ -111,5 +127,6 @@ def do_gnuth_experiments():
 
 
 if __name__ == "__main__":
-    do_allpay_experiments()
+    # do_allpay_experiments()
     # do_first_price_experiments()
+    do_three_bidders_experiments()
