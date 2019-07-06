@@ -101,17 +101,21 @@ class AuctionPlayerSpecification(PlayerSpecification):
         self.add_bids(type_index=1, bidding_graph=bidding_graph, parent_node=parent_node)
         return self.get_strategies_from_graph(parent_node, bidding_graph)
 
+    def get_bid_options(self, valuation, previous_bid):
+
+        max_bid = valuation
+        if self.no_jumps:
+            max_bid = previous_bid + 1
+
+        return [bid for bid in self.player_actions if previous_bid <= bid <= max_bid]
+
     def add_bids(self, type_index, bidding_graph, parent_node):
         if type_index == len(self.player_types):
             return
 
         valuation = self.player_types[type_index]
         previous_bid = parent_node[1]
-        max_bid = valuation
-        if self.no_jumps:
-            max_bid = previous_bid + 1
-
-        valid_bids = [bid for bid in self.player_actions if previous_bid <= bid <= max_bid]
+        valid_bids = self.get_bid_options(valuation=valuation, previous_bid=previous_bid)
 
         for bid in valid_bids:
             bid_per_valuation = (valuation, bid)
