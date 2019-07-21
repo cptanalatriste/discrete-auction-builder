@@ -5,6 +5,13 @@ from auctions import GnuthPlayerSpecification, FirstPriceAuction, PezanisAuction
 
 
 class ElevenPlayerSpecification(AuctionPlayerSpecification):
+    player_valuations = range(0, 11)
+
+    def __init__(self, no_jumps):
+
+        super(ElevenPlayerSpecification, self).__init__(player_types=ElevenPlayerSpecification.player_valuations,
+                                                        player_actions=ElevenPlayerSpecification.player_valuations,
+                                                        no_jumps=no_jumps)
 
     def get_bid_options(self, valuation, previous_bid):
         min_bid = previous_bid
@@ -13,13 +20,38 @@ class ElevenPlayerSpecification(AuctionPlayerSpecification):
         if valuation >= 3 and min_bid == 0:
             min_bid = 1
 
-        # TODO: Remove later. This is a temporary workaround
         if valuation == 5:
             max_bid = 3
         elif valuation == 6:
             max_bid = 4
         elif 7 <= valuation <= 8:
             max_bid = 5
+
+        return [bid for bid in self.player_actions if min_bid <= bid <= max_bid]
+
+
+class ThirteenPlayerSpecification(AuctionPlayerSpecification):
+    player_valuations = range(0, 13)
+
+    def __init__(self, no_jumps):
+
+        super(ThirteenPlayerSpecification, self).__init__(player_types=ThirteenPlayerSpecification.player_valuations,
+                                                          player_actions=ThirteenPlayerSpecification.player_valuations,
+                                                          no_jumps=no_jumps)
+
+    def get_bid_options(self, valuation, previous_bid):
+        min_bid = previous_bid
+        max_bid = valuation - 1
+
+        if valuation >= 3 and min_bid == 0:
+            min_bid = 1
+
+        if 6 <= valuation <= 8:
+            max_bid = valuation - 2
+        elif 9 <= valuation <= 10:
+            max_bid = valuation - 3
+        elif 11 <= valuation <= 12:
+            max_bid = valuation - 4
 
         return [bid for bid in self.player_actions if min_bid <= bid <= max_bid]
 
@@ -55,7 +87,8 @@ def do_allpay_experiments():
 
     for no_jumps in [False]:
         for no_ties in [True, False]:
-            run_first_price(player_valuations, no_jumps, no_ties, all_pay, only_pure=only_pure)
+            run_first_price(player_valuations=player_valuations, no_jumps=no_jumps,
+                            no_ties=no_ties, all_pay=all_pay, only_pure=only_pure)
 
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 
@@ -92,34 +125,39 @@ def do_first_price_experiments():
     no_ties = False
     all_pay = False
 
-    run_first_price(player_valuations, no_jumps, no_ties, all_pay)
+    run_first_price(player_valuations=player_valuations, no_jumps=no_jumps, no_ties=no_ties, all_pay=all_pay)
 
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 
 
-def do_eleven_valuations():
-    player_valuations = range(0, 11)
-
+def do_custom_valuations(specification_class):
     start_time = time.time()
 
     no_jumps = False
     no_ties = False
     all_pay = False
 
-    run_first_price(player_valuations, no_jumps, no_ties, all_pay, specification_class=ElevenPlayerSpecification)
+    run_first_price(no_jumps=no_jumps, no_ties=no_ties, all_pay=all_pay, specification_class=specification_class)
 
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 
 
-def run_first_price(player_valuations, no_jumps, no_ties, all_pay, only_pure=True, num_players=2,
+def run_first_price(no_jumps, no_ties, all_pay, player_valuations=[], only_pure=True, num_players=2,
                     specification_class=AuctionPlayerSpecification):
-    game_name = "num_players_" + str(num_players) + "_allpay_" + str(all_pay) + "_noties_" + str(
-        no_ties) + "_nojumps_" + str(no_jumps) + "_" + str(
-        len(player_valuations)) + "_valuations_auction"
+    valuations = len(player_valuations)
+    if valuations == 0:
+        valuations = len(specification_class.player_valuations)
 
-    player_specifications = [
-        specification_class(player_actions=player_valuations, player_types=player_valuations,
-                            no_jumps=no_jumps) for _ in range(num_players)]
+    game_name = "num_players_" + str(num_players) + "_allpay_" + str(all_pay) + "_noties_" + str(
+        no_ties) + "_nojumps_" + str(no_jumps) + "_" + str(valuations) + "_valuations_auction"
+
+    if len(player_valuations) != 0:
+        player_specifications = [
+            specification_class(player_actions=player_valuations, player_types=player_valuations,
+                                no_jumps=no_jumps) for _ in range(num_players)]
+    else:
+        player_specifications = [
+            specification_class(no_jumps=no_jumps) for _ in range(num_players)]
 
     another_sample_auction = FirstPriceAuction(game_name=game_name,
                                                player_specifications=player_specifications, all_pay=all_pay,
@@ -166,4 +204,4 @@ if __name__ == "__main__":
     # do_first_price_experiments()
     # do_three_bidders_experiments()
 
-    do_eleven_valuations()
+    do_custom_valuations(specification_class=ThirteenPlayerSpecification)
