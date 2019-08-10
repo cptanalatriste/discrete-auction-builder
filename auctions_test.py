@@ -79,10 +79,10 @@ class GnuthAuctionTest(unittest.TestCase):
             self.assertTrue(strong_equilibrium)
 
 
-class FirstPriceAuctionTest(unittest.TestCase):
+class FirstPriceThreeBiddersTest(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
-        super(FirstPriceAuctionTest, self).__init__(*args, **kwargs)
+        super(FirstPriceThreeBiddersTest, self).__init__(*args, **kwargs)
 
         player_valuations = [0, 1, 2]
         self.player_specification = AuctionPlayerSpecification(player_actions=player_valuations,
@@ -90,23 +90,63 @@ class FirstPriceAuctionTest(unittest.TestCase):
         self.opponent_specification = AuctionPlayerSpecification.from_specification(self.player_specification)
         self.third_player_specification = AuctionPlayerSpecification.from_specification(self.player_specification)
 
-        self.all_pay_auction = FirstPriceAuction(game_name="allpay_auction",
-                                                 player_specifications=[self.player_specification,
-                                                                        self.opponent_specification], all_pay=True,
-                                                 no_ties=False)
-
-        self.first_price_auction = FirstPriceAuction(game_name="first_price_auction",
-                                                     player_specifications=[self.player_specification,
-                                                                            self.opponent_specification], all_pay=False,
-                                                     no_ties=False)
-
-    def test_three_bidder_auction(self):
-        three_bidder_auction = FirstPriceAuction(game_name="threebidders_auction",
+        self.auction_no_ties = FirstPriceAuction(game_name="threebidders_auction",
                                                  player_specifications=[self.player_specification,
                                                                         self.opponent_specification,
                                                                         self.third_player_specification], all_pay=False,
                                                  no_ties=True)
 
+        self.auction_with_ties = FirstPriceAuction(game_name="threebidders_auction",
+                                                   player_specifications=[self.player_specification,
+                                                                          self.opponent_specification,
+                                                                          self.third_player_specification],
+                                                   all_pay=False,
+                                                   no_ties=False)
+
+    def test_withties_auction(self):
+        expected_player_utility = Fraction(1, 3)
+        expected_opponent_utility = Fraction(1, 3)
+        expected_tnird_utility = Fraction(1, 3)
+        player_strategy = (0, 0, 0)
+        opponent_strategy = (0, 0, 0)
+        third_strategy = (0, 0, 0)
+
+        actual_player_utility, actual_opponent_utility, actual_third_utility = self.auction_with_ties.get_expected_utilities(
+            (player_strategy, opponent_strategy, third_strategy))
+
+        self.assertEqual(actual_player_utility, expected_player_utility)
+        self.assertEqual(actual_opponent_utility, expected_opponent_utility)
+        self.assertEqual(actual_third_utility, expected_tnird_utility)
+
+        expected_player_utility = Fraction(7, 81)
+        expected_opponent_utility = Fraction(0)
+        expected_tnird_utility = Fraction(0)
+        player_strategy = (0, 1, 1)
+        opponent_strategy = (0, 1, 2)
+        third_strategy = (0, 1, 2)
+
+        actual_player_utility, actual_opponent_utility, actual_third_utility = self.auction_with_ties.get_expected_utilities(
+            (player_strategy, opponent_strategy, third_strategy))
+
+        self.assertEqual(actual_player_utility, expected_player_utility)
+        self.assertEqual(actual_opponent_utility, expected_opponent_utility)
+        self.assertEqual(actual_third_utility, expected_tnird_utility)
+
+        expected_player_utility = Fraction(11, 81)
+        expected_opponent_utility = Fraction(2, 81)
+        expected_tnird_utility = Fraction(0)
+        player_strategy = (0, 0, 1)
+        opponent_strategy = (0, 0, 2)
+        third_strategy = (0, 1, 2)
+
+        actual_player_utility, actual_opponent_utility, actual_third_utility = self.auction_with_ties.get_expected_utilities(
+            (player_strategy, opponent_strategy, third_strategy))
+
+        self.assertEqual(actual_player_utility, expected_player_utility)
+        self.assertEqual(actual_opponent_utility, expected_opponent_utility)
+        self.assertEqual(actual_third_utility, expected_tnird_utility)
+
+    def test_noties_auction(self):
         expected_player_utility = Fraction(0)
         expected_opponent_utility = Fraction(0)
         expected_tnird_utility = Fraction(0)
@@ -114,7 +154,7 @@ class FirstPriceAuctionTest(unittest.TestCase):
         opponent_strategy = (0, 0, 0)
         third_strategy = (0, 0, 0)
 
-        actual_player_utility, actual_opponent_utility, actual_third_utility = three_bidder_auction.get_expected_utilities(
+        actual_player_utility, actual_opponent_utility, actual_third_utility = self.auction_no_ties.get_expected_utilities(
             (player_strategy, opponent_strategy, third_strategy))
 
         self.assertEqual(actual_player_utility, expected_player_utility)
@@ -128,7 +168,7 @@ class FirstPriceAuctionTest(unittest.TestCase):
         opponent_strategy = (0, 1, 2)
         third_strategy = (0, 1, 2)
 
-        actual_player_utility, actual_opponent_utility, actual_third_utility = three_bidder_auction.get_expected_utilities(
+        actual_player_utility, actual_opponent_utility, actual_third_utility = self.auction_no_ties.get_expected_utilities(
             (player_strategy, opponent_strategy, third_strategy))
 
         self.assertEqual(actual_player_utility, expected_player_utility)
@@ -142,13 +182,33 @@ class FirstPriceAuctionTest(unittest.TestCase):
         opponent_strategy = (0, 0, 2)
         third_strategy = (0, 1, 2)
 
-        actual_player_utility, actual_opponent_utility, actual_third_utility = three_bidder_auction.get_expected_utilities(
+        actual_player_utility, actual_opponent_utility, actual_third_utility = self.auction_no_ties.get_expected_utilities(
             (player_strategy, opponent_strategy, third_strategy))
 
         self.assertEqual(actual_player_utility, expected_player_utility)
         self.assertEqual(actual_opponent_utility, expected_opponent_utility)
         self.assertEqual(actual_third_utility, expected_tnird_utility)
 
+
+class FirstPriceAuctionTest(unittest.TestCase):
+
+    def __init__(self, *args, **kwargs):
+        super(FirstPriceAuctionTest, self).__init__(*args, **kwargs)
+
+        player_valuations = [0, 1, 2]
+        self.player_specification = AuctionPlayerSpecification(player_actions=player_valuations,
+                                                               player_types=player_valuations, no_jumps=False)
+        self.opponent_specification = AuctionPlayerSpecification.from_specification(self.player_specification)
+
+        self.all_pay_auction = FirstPriceAuction(game_name="allpay_auction",
+                                                 player_specifications=[self.player_specification,
+                                                                        self.opponent_specification], all_pay=True,
+                                                 no_ties=False)
+
+        self.first_price_auction = FirstPriceAuction(game_name="first_price_auction",
+                                                     player_specifications=[self.player_specification,
+                                                                            self.opponent_specification], all_pay=False,
+                                                     no_ties=False)
 
     def test_pure_strategies(self):
         expected_strategies = [(0, 0, 0), (0, 0, 1), (0, 0, 2), (0, 1, 1), (0, 1, 2)]
