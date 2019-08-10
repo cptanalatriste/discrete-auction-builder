@@ -90,18 +90,67 @@ class FirstPriceThreeBiddersTest(unittest.TestCase):
         self.opponent_specification = AuctionPlayerSpecification.from_specification(self.player_specification)
         self.third_player_specification = AuctionPlayerSpecification.from_specification(self.player_specification)
 
-        self.auction_no_ties = FirstPriceAuction(game_name="threebidders_auction",
+        self.auction_no_ties = FirstPriceAuction(game_name="3-bidders-no-ties",
                                                  player_specifications=[self.player_specification,
                                                                         self.opponent_specification,
                                                                         self.third_player_specification], all_pay=False,
                                                  no_ties=True)
 
-        self.auction_with_ties = FirstPriceAuction(game_name="threebidders_auction",
+        self.auction_with_ties = FirstPriceAuction(game_name="3-bidders-with-ties",
                                                    player_specifications=[self.player_specification,
                                                                           self.opponent_specification,
                                                                           self.third_player_specification],
                                                    all_pay=False,
                                                    no_ties=False)
+        self.allpay_with_ties = FirstPriceAuction(game_name="3-bidders-allpay-ties",
+                                                  player_specifications=[self.player_specification,
+                                                                         self.opponent_specification,
+                                                                         self.third_player_specification],
+                                                  all_pay=True,
+                                                  no_ties=False)
+
+    def test_allpay_ties_auction(self):
+        expected_player_utility = Fraction(1, 3)
+        expected_opponent_utility = Fraction(1, 3)
+        expected_tnird_utility = Fraction(1, 3)
+        player_strategy = (0, 0, 0)
+        opponent_strategy = (0, 0, 0)
+        third_strategy = (0, 0, 0)
+
+        actual_player_utility, actual_opponent_utility, actual_third_utility = self.allpay_with_ties.get_expected_utilities(
+            (player_strategy, opponent_strategy, third_strategy))
+
+        self.assertEqual(actual_player_utility, expected_player_utility)
+        self.assertEqual(actual_opponent_utility, expected_opponent_utility)
+        self.assertEqual(actual_third_utility, expected_tnird_utility)
+
+        expected_player_utility = Fraction(-11, 27)
+        expected_opponent_utility = Fraction(-18, 55)
+        expected_tnird_utility = Fraction(-18, 55)
+        player_strategy = (0, 1, 1)
+        opponent_strategy = (0, 1, 2)
+        third_strategy = (0, 1, 2)
+
+        actual_player_utility, actual_opponent_utility, actual_third_utility = self.allpay_with_ties.get_expected_utilities(
+            (player_strategy, opponent_strategy, third_strategy))
+
+        self.assertEqual(actual_player_utility, expected_player_utility)
+        self.assertEqual(actual_opponent_utility, expected_opponent_utility)
+        self.assertEqual(actual_third_utility, expected_tnird_utility)
+
+        expected_player_utility = Fraction(-7, 81)
+        expected_opponent_utility = Fraction(-7, 81)
+        expected_tnird_utility = Fraction(-7 / 27)
+        player_strategy = (0, 0, 1)
+        opponent_strategy = (0, 0, 2)
+        third_strategy = (0, 1, 2)
+
+        actual_player_utility, actual_opponent_utility, actual_third_utility = self.allpay_with_ties.get_expected_utilities(
+            (player_strategy, opponent_strategy, third_strategy))
+
+        self.assertEqual(actual_player_utility, expected_player_utility)
+        self.assertEqual(actual_opponent_utility, expected_opponent_utility)
+        self.assertEqual(actual_third_utility, expected_tnird_utility)
 
     def test_withties_auction(self):
         expected_player_utility = Fraction(1, 3)

@@ -96,13 +96,15 @@ def do_allpay_experiments():
 def do_three_bidders_experiments():
     # player_valuations = range(0, 3)
     # player_valuations = range(0, 4)
-    # player_valuations = range(0, 6)
-    player_valuations = range(0, 7)
+    player_valuations = range(0, 6)
+    # player_valuations = range(0, 7)
 
     start_time = time.time()
 
     no_jumps = False
-    no_ties = True
+    # no_ties = True
+    no_ties = False
+
     all_pay = False
     num_players = 3
 
@@ -202,6 +204,6 @@ def do_gnuth_experiments():
 if __name__ == "__main__":
     # do_allpay_experiments()
     # do_first_price_experiments()
-    # do_three_bidders_experiments()
+    do_three_bidders_experiments()
 
-    do_custom_valuations(specification_class=ThirteenPlayerSpecification)
+    # do_custom_valuations(specification_class=ThirteenPlayerSpecification)
