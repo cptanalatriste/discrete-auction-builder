@@ -4,6 +4,24 @@ import time
 from auctions import GnuthPlayerSpecification, FirstPriceAuction, PezanisAuction, AuctionPlayerSpecification
 
 
+class SixPlayerSpecification(AuctionPlayerSpecification):
+    player_valuations = range(0, 6)
+
+    def __init__(self, no_jumps):
+        super(SixPlayerSpecification, self).__init__(player_types=SixPlayerSpecification.player_valuations,
+                                                     player_actions=SixPlayerSpecification.player_valuations,
+                                                     no_jumps=no_jumps)
+
+    def get_bid_options(self, valuation, previous_bid):
+        min_bid = previous_bid
+        max_bid = max(valuation - 1, 0)
+
+        if valuation >= 2 and min_bid == 0:
+            min_bid = 1
+
+        return [bid for bid in self.player_actions if min_bid <= bid <= max_bid]
+
+
 class ElevenPlayerSpecification(AuctionPlayerSpecification):
     player_valuations = range(0, 11)
 
@@ -132,14 +150,11 @@ def do_first_price_experiments():
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 
 
-def do_custom_valuations(specification_class):
+def do_custom_valuations(specification_class, num_players=2, no_jumps=False, no_ties=False, all_pay=False):
     start_time = time.time()
 
-    no_jumps = False
-    no_ties = False
-    all_pay = False
-
-    run_first_price(no_jumps=no_jumps, no_ties=no_ties, all_pay=all_pay, specification_class=specification_class)
+    run_first_price(no_jumps=no_jumps, no_ties=no_ties, all_pay=all_pay, specification_class=specification_class,
+                    num_players=num_players)
 
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 
@@ -204,6 +219,7 @@ def do_gnuth_experiments():
 if __name__ == "__main__":
     # do_allpay_experiments()
     # do_first_price_experiments()
-    do_three_bidders_experiments()
+    # do_three_bidders_experiments()
 
     # do_custom_valuations(specification_class=ThirteenPlayerSpecification)
+    do_custom_valuations(specification_class=SixPlayerSpecification, num_players=3)
