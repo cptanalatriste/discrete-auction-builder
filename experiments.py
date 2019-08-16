@@ -4,6 +4,21 @@ import time
 from auctions import GnuthPlayerSpecification, FirstPriceAuction, PezanisAuction, AuctionPlayerSpecification
 
 
+class FivePlayerSpecification(AuctionPlayerSpecification):
+    player_valuations = range(0, 5)
+
+    def __init__(self, no_jumps):
+        super(FivePlayerSpecification, self).__init__(player_types=FivePlayerSpecification.player_valuations,
+                                                      player_actions=FivePlayerSpecification.player_valuations,
+                                                      no_jumps=no_jumps)
+
+    def get_bid_range(self, valuation, previous_bid):
+        min_bid = previous_bid
+        max_bid = max(valuation - 1, 0)
+
+        return min_bid, max_bid
+
+
 class SixPlayerSpecification(AuctionPlayerSpecification):
     player_valuations = range(0, 6)
 
@@ -12,14 +27,14 @@ class SixPlayerSpecification(AuctionPlayerSpecification):
                                                      player_actions=SixPlayerSpecification.player_valuations,
                                                      no_jumps=no_jumps)
 
-    def get_bid_options(self, valuation, previous_bid):
+    def get_bid_range(self, valuation, previous_bid):
         min_bid = previous_bid
         max_bid = max(valuation - 1, 0)
 
         if valuation >= 2 and min_bid == 0:
             min_bid = 1
 
-        return [bid for bid in self.player_actions if min_bid <= bid <= max_bid]
+        return min_bid, max_bid
 
 
 class ElevenPlayerSpecification(AuctionPlayerSpecification):
@@ -31,7 +46,7 @@ class ElevenPlayerSpecification(AuctionPlayerSpecification):
                                                         player_actions=ElevenPlayerSpecification.player_valuations,
                                                         no_jumps=no_jumps)
 
-    def get_bid_options(self, valuation, previous_bid):
+    def get_bid_range(self, valuation, previous_bid):
         min_bid = previous_bid
         max_bid = min(valuation - 1, 6)
 
@@ -45,7 +60,7 @@ class ElevenPlayerSpecification(AuctionPlayerSpecification):
         elif 7 <= valuation <= 8:
             max_bid = 5
 
-        return [bid for bid in self.player_actions if min_bid <= bid <= max_bid]
+        return min_bid, max_bid
 
 
 class ThirteenPlayerSpecification(AuctionPlayerSpecification):
@@ -57,7 +72,7 @@ class ThirteenPlayerSpecification(AuctionPlayerSpecification):
                                                           player_actions=ThirteenPlayerSpecification.player_valuations,
                                                           no_jumps=no_jumps)
 
-    def get_bid_options(self, valuation, previous_bid):
+    def get_bid_range(self, valuation, previous_bid):
         min_bid = previous_bid
         max_bid = valuation - 1
 
@@ -71,7 +86,7 @@ class ThirteenPlayerSpecification(AuctionPlayerSpecification):
         elif 11 <= valuation <= 12:
             max_bid = valuation - 4
 
-        return [bid for bid in self.player_actions if min_bid <= bid <= max_bid]
+        return min_bid, max_bid
 
 
 def do_pezanis_experiments():
@@ -222,4 +237,5 @@ if __name__ == "__main__":
     # do_three_bidders_experiments()
 
     # do_custom_valuations(specification_class=ThirteenPlayerSpecification)
-    do_custom_valuations(specification_class=SixPlayerSpecification, num_players=3)
+    # do_custom_valuations(specification_class=SixPlayerSpecification, num_players=3)
+    do_custom_valuations(specification_class=FivePlayerSpecification, num_players=3, no_ties=False, all_pay=True)

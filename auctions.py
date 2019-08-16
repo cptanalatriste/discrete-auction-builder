@@ -101,13 +101,18 @@ class AuctionPlayerSpecification(PlayerSpecification):
         self.add_bids(type_index=1, bidding_graph=bidding_graph, parent_node=parent_node)
         return self.get_strategies_from_graph(parent_node, bidding_graph)
 
-    def get_bid_options(self, valuation, previous_bid):
-
+    def get_bid_range(self, valuation, previous_bid):
         max_bid = valuation
         if self.no_jumps:
             max_bid = previous_bid + 1
 
-        return [bid for bid in self.player_actions if previous_bid <= bid <= max_bid]
+        return previous_bid, max_bid
+
+    def get_bid_options(self, valuation, previous_bid):
+
+        min_bid, max_bid = self.get_bid_range(valuation, previous_bid)
+
+        return [bid for bid in self.player_actions if min_bid <= bid <= max_bid]
 
     def add_bids(self, type_index, bidding_graph, parent_node):
         if type_index == len(self.player_types):
