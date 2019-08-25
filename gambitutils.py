@@ -3,15 +3,13 @@ import subprocess
 import time
 from string import Template
 
-GAMBIT_DIR = "/Applications/Gambit.app/Contents/MacOS/"
-# GAMBIT_DIR = "C:\\Program Files (x86)\\Gambit\\"
+GAMBIT_DIR = "C:\\Program Files (x86)\\Gambit\\"
+ALL_EQUILIBRIA = "gambit-enumpoly.exe"
+PURE_EQUILIBRIA = "gambit-enumpure.exe"
 
-
-# ALL_EQUILIBRIA = "gambit-enumpoly.exe"
-# PURE_EQUILIBRIA = "gambit-enumpure.exe"
-
-ALL_EQUILIBRIA = "gambit-enumpoly"
-PURE_EQUILIBRIA = "gambit-enumpure"
+# GAMBIT_DIR = "/Applications/Gambit.app/Contents/MacOS/"
+# ALL_EQUILIBRIA = "gambit-enumpoly"
+# PURE_EQUILIBRIA = "gambit-enumpure"
 
 
 def start_nfg_section(nfg_file):

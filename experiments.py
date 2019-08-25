@@ -19,6 +19,40 @@ class FivePlayerSpecification(AuctionPlayerSpecification):
         return min_bid, max_bid
 
 
+class WeaklyIncreasing6PlayerSpecification(AuctionPlayerSpecification):
+    player_valuations = range(0, 6)
+
+    def __init__(self, no_jumps):
+        super(WeaklyIncreasing6PlayerSpecification, self).__init__(
+            player_types=SixPlayerSpecification.player_valuations,
+            player_actions=SixPlayerSpecification.player_valuations,
+            no_jumps=no_jumps)
+
+    def get_bid_range(self, valuation, previous_bid):
+        min_bid = previous_bid
+        max_bid = max(valuation - 1, 0)
+
+        return min_bid, max_bid
+
+
+class SevenPlayerSpecification(AuctionPlayerSpecification):
+    player_valuations = range(0, 7)
+
+    def __init__(self, no_jumps):
+        super(SevenPlayerSpecification, self).__init__(player_types=SevenPlayerSpecification.player_valuations,
+                                                       player_actions=SevenPlayerSpecification.player_valuations,
+                                                       no_jumps=no_jumps)
+
+    def get_bid_range(self, valuation, previous_bid):
+        min_bid = previous_bid
+        max_bid = max(valuation - 1, 0)
+
+        if valuation >= 2 and min_bid == 0:
+            min_bid = 1
+
+        return min_bid, max_bid
+
+
 class SixPlayerSpecification(AuctionPlayerSpecification):
     player_valuations = range(0, 6)
 
@@ -237,5 +271,12 @@ if __name__ == "__main__":
     # do_three_bidders_experiments()
 
     # do_custom_valuations(specification_class=ThirteenPlayerSpecification)
+
+    # Trello card: https://trello.com/c/YQss546H/11-first-price-with-ties-and-3-bidders
     # do_custom_valuations(specification_class=SixPlayerSpecification, num_players=3)
-    do_custom_valuations(specification_class=FivePlayerSpecification, num_players=3, no_ties=False, all_pay=True)
+    do_custom_valuations(specification_class=SevenPlayerSpecification, num_players=3)
+
+    # Trello card: https://trello.com/c/7avj9H5M/12-all-pay-with-ties-and-3-bidders
+    # do_custom_valuations(specification_class=FivePlayerSpecification, num_players=3, no_ties=False, all_pay=True)
+    # do_custom_valuations(specification_class=WeaklyIncreasing6PlayerSpecification, num_players=3, no_ties=False,
+    #                      all_pay=True)
