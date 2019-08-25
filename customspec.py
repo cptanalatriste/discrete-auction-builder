@@ -15,9 +15,9 @@ class ThreePlayersFirsPriceTiesSpec(AuctionPlayerSpecification):
         min_bid = previous_bid
         max_bid = max(valuation - 1, 0)
 
-        if 2 <= valuation <= 4:
+        if 2 <= valuation <= 4 and min_bid == 0:
             min_bid = 1
-        elif valuation >= 5:
+        elif valuation >= 5 and min_bid < 2:
             min_bid = 2
 
         return min_bid, max_bid
