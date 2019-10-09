@@ -2,7 +2,7 @@ import logging
 import time
 
 from auctions import GnuthPlayerSpecification, FirstPriceAuction, PezanisAuction, AuctionPlayerSpecification
-from customspec import SevenPlayerSpecification, ThreePlayersFirsPriceTiesSpec
+from customspec import SevenPlayerSpecification, ThreePlayersFirsPriceTiesSpec, CustomWeaklyIncreasing
 
 
 def do_pezanis_experiments():
@@ -81,31 +81,32 @@ def do_first_price_experiments():
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 
 
-def do_custom_valuations(specification_class, num_players=2, no_jumps=False, no_ties=False, all_pay=False):
+def do_custom_valuations(num_players=2, no_jumps=False, no_ties=False, all_pay=False, range_list=[]):
     start_time = time.time()
 
-    run_first_price(no_jumps=no_jumps, no_ties=no_ties, all_pay=all_pay, specification_class=specification_class,
-                    num_players=num_players)
+    player_specifications = [
+        CustomWeaklyIncreasing(range_list=range_list,
+                               no_jumps=no_jumps) for _ in range(num_players)]
+
+    valuations = len(range_list)
+    run_first_price(no_jumps=no_jumps, no_ties=no_ties, all_pay=all_pay, player_specifications=player_specifications,
+                    num_players=num_players, valuations=valuations)
 
     logging.info("--- %s seconds ---" % (time.time() - start_time))
 
 
 def run_first_price(no_jumps, no_ties, all_pay, player_valuations=[], only_pure=True, num_players=2,
-                    specification_class=AuctionPlayerSpecification):
-    valuations = len(player_valuations)
-    if valuations == 0:
+                    specification_class=AuctionPlayerSpecification, player_specifications=None, valuations=0):
+    if player_specifications is None:
         valuations = len(specification_class.player_valuations)
 
     game_name = "num_players_" + str(num_players) + "_allpay_" + str(all_pay) + "_noties_" + str(
         no_ties) + "_nojumps_" + str(no_jumps) + "_" + str(valuations) + "_valuations_auction"
 
-    if len(player_valuations) != 0:
+    if player_specifications is None:
         player_specifications = [
-            specification_class(player_actions=player_valuations, player_types=player_valuations,
-                                no_jumps=no_jumps) for _ in range(num_players)]
-    else:
-        player_specifications = [
-            specification_class(no_jumps=no_jumps) for _ in range(num_players)]
+            AuctionPlayerSpecification(player_actions=player_valuations, player_types=player_valuations,
+                                       no_jumps=no_jumps) for _ in range(num_players)]
 
     another_sample_auction = FirstPriceAuction(game_name=game_name,
                                                player_specifications=player_specifications, all_pay=all_pay,
@@ -158,10 +159,14 @@ if __name__ == "__main__":
     # do_custom_valuations(specification_class=SixPlayerSpecification, num_players=3)
     # do_custom_valuations(specification_class=SevenPlayerSpecification, num_players=3)
 
-    ThreePlayersFirsPriceTiesSpec.player_valuations = range(0, 8)
-    do_custom_valuations(specification_class=ThreePlayersFirsPriceTiesSpec, num_players=3)
+    # ThreePlayersFirsPriceTiesSpec.player_valuations = range(0, 8)
+    # do_custom_valuations(specification_class=ThreePlayersFirsPriceTiesSpec, num_players=3)
 
     # Trello card: https://trello.com/c/7avj9H5M/12-all-pay-with-ties-and-3-bidders
     # do_custom_valuations(specification_class=FivePlayerSpecification, num_players=3, no_ties=False, all_pay=True)
     # do_custom_valuations(specification_class=WeaklyIncreasing6PlayerSpecification, num_players=3, no_ties=False,
     #                      all_pay=True)
+
+    # Trello card: https://trello.com/c/3GAsAFSE/4-first-price-without-ties-and-3-bidders
+    range_list = [(0, 0), (0, 1), (1, 1), (2, 2), (2, 3), (3, 4), (3, 4)]
+    do_custom_valuations(num_players=3, no_jumps=False, no_ties=True, all_pay=False, range_list=range_list)

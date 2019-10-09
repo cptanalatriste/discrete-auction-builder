@@ -1,6 +1,32 @@
 from auctions import AuctionPlayerSpecification
 
 
+class CustomWeaklyIncreasing(AuctionPlayerSpecification):
+
+    def __init__(self, range_list, no_jumps):
+
+        self.range_list = range_list
+
+        super(CustomWeaklyIncreasing, self).__init__(
+            player_types=range(len(range_list)),
+            player_actions=range(len(range_list)),
+            no_jumps=no_jumps)
+
+    def get_bid_range(self, valuation, previous_bid):
+        min_bid = previous_bid
+        max_bid = max(valuation - 1, 0)
+
+        expected_min_bid, expected_max_bid = self.range_list[valuation]
+
+        if min_bid < expected_min_bid:
+            min_bid = min_bid
+
+        if max_bid > expected_max_bid:
+            max_bid = expected_max_bid
+
+        return min_bid, max_bid
+
+
 class ThreePlayersFirsPriceTiesSpec(AuctionPlayerSpecification):
     player_valuations = None
 
