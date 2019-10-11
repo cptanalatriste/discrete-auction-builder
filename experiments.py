@@ -168,5 +168,13 @@ if __name__ == "__main__":
     #                      all_pay=True)
 
     # Trello card: https://trello.com/c/3GAsAFSE/4-first-price-without-ties-and-3-bidders
-    range_list = [(0, 0), (0, 1), (1, 1), (2, 2), (2, 3), (3, 4), (3, 4)]
+    # range_list = [(0, 0), (0, 1), (1, 1), (2, 2), (2, 3), (3, 4), (3, 4)]
+    # do_custom_valuations(num_players=3, no_jumps=False, no_ties=True, all_pay=False, range_list=range_list)
+    range_list = [(0, 0), (0, 1), (1, 1), (2, 2), (2, 3), (3, 4), (3, 5), (3, 5)]
     do_custom_valuations(num_players=3, no_jumps=False, no_ties=True, all_pay=False, range_list=range_list)
+
+    # Trello card: https://trello.com/c/EzwXJ3E6/9-all-pay-2-bidders
+    # range_list = [(0, 0), (0, 0), (0, 1), (0, 2), (0, 3), (1, 4), (1, 4)]
+    # do_custom_valuations(num_players=2, no_jumps=False, no_ties=False, all_pay=True, range_list=range_list)
+    # range_list = [(0, 0), (0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (1, 5), (1, 5)]
+    # do_custom_valuations(num_players=2, no_jumps=False, no_ties=False, all_pay=True, range_list=range_list)

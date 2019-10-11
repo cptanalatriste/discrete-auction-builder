@@ -29,6 +29,8 @@ class PlayerSpecification(object):
     def get_strategy_catalogue(self):
         if self.strategy_catalogue is None:
             self.strategy_catalogue = list(self.get_pure_strategies())
+            logging.info("Pure strategies obtained: " + str(len(self.strategy_catalogue)))
+
         return self.strategy_catalogue
 
     def get_strategy_description(self, strategy):
