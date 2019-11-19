@@ -155,17 +155,33 @@ if __name__ == "__main__":
 
     # do_custom_valuations(specification_class=ThirteenPlayerSpecification)
 
+    # Trello card: https://trello.com/c/HkcJ3IW0/2-pure-first-price-n2-even-ties
+    # range_list = [(0, 0), (0, 0), (0, 1), (1, 2), (1, 3), (1, 4), (1, 4), (1, 5), (1, 6), (1, 6), (1, 7), (1, 7),
+    #              (1, 8)]
+    # do_custom_valuations(num_players=2, no_jumps=False, no_ties=False, all_pay=False, range_list=range_list)
+
     # Trello card: https://trello.com/c/YQss546H/11-first-price-with-ties-and-3-bidders
     # do_custom_valuations(specification_class=SixPlayerSpecification, num_players=3)
     # do_custom_valuations(specification_class=SevenPlayerSpecification, num_players=3)
-
     # ThreePlayersFirsPriceTiesSpec.player_valuations = range(0, 8)
     # do_custom_valuations(specification_class=ThreePlayersFirsPriceTiesSpec, num_players=3)
+    range_list = [(0, 0), (0, 0), (1, 1), (1, 2), (1, 3), (2, 4), (2, 5), (2, 6), (2, 7)]
+    do_custom_valuations(num_players=3, no_jumps=False, no_ties=False, all_pay=False, range_list=range_list)
 
     # Trello card: https://trello.com/c/7avj9H5M/12-all-pay-with-ties-and-3-bidders
     # do_custom_valuations(specification_class=FivePlayerSpecification, num_players=3, no_ties=False, all_pay=True)
     # do_custom_valuations(specification_class=WeaklyIncreasing6PlayerSpecification, num_players=3, no_ties=False,
     #                      all_pay=True)
+    # range_list = [(0, 0), (0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5)]
+    # do_custom_valuations(num_players=3, no_jumps=False, no_ties=False, all_pay=True, range_list=range_list)
+    # range_list = [(0, 0), (0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6)]
+    # do_custom_valuations(num_players=3, no_jumps=False, no_ties=False, all_pay=True, range_list=range_list)
+
+    # Trello card: https://trello.com/c/udO32BuS/10-all-pay-without-ties-and-3-bidders
+    # range_list = [(0, 0), (0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5)]
+    # do_custom_valuations(num_players=3, no_jumps=False, no_ties=True, all_pay=True, range_list=range_list)
+    # range_list = [(0, 0), (0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6)]
+    # do_custom_valuations(num_players=3, no_jumps=False, no_ties=True, all_pay=True, range_list=range_list)
 
     # Trello card: https://trello.com/c/3GAsAFSE/4-first-price-without-ties-and-3-bidders
     # range_list = [(0, 0), (0, 1), (1, 1), (2, 2), (2, 3), (3, 4), (3, 4)]
@@ -180,11 +196,9 @@ if __name__ == "__main__":
     # do_custom_valuations(num_players=2, no_jumps=False, no_ties=False, all_pay=True, range_list=range_list)
     # range_list = [(0, 0), (0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (1, 6), (1, 6)]
     # do_custom_valuations(num_players=2, no_jumps=False, no_ties=False, all_pay=True, range_list=range_list)
-    range_list = [(0, 0), (0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (1, 6), (1, 7), (1, 7)]
-    do_custom_valuations(num_players=2, no_jumps=False, no_ties=False, all_pay=True, range_list=range_list)
-
-
-    # Starting no-ties
+    # range_list = [(0, 0), (0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (1, 6), (1, 7), (1, 7)]
+    # do_custom_valuations(num_players=2, no_jumps=False, no_ties=False, all_pay=True, range_list=range_list)
+    # Starting no-ties ...
     # range_list = [(0, 0), (0, 0), (0, 1), (0, 2), (0, 3), (1, 4), (1, 5), (1, 6)]
     # do_custom_valuations(num_players=2, no_jumps=False, no_ties=True, all_pay=True, range_list=range_list)
     # range_list = [(0, 0), (0, 0), (0, 1), (0, 2), (0, 3), (1, 4), (1, 5), (1, 6), (1, 7)]
