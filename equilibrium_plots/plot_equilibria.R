@@ -1,4 +1,8 @@
 library(tidyverse)
+library(extrafont)
+
+font_import()
+loadfonts()
 
 equilibrium <- read_csv("3_bidders_13_valuations.csv")
 
@@ -23,8 +27,11 @@ ggplot(data = temp) +
   theme_bw() +
   xlab("Valuation") + 
   ylab("Bid") +
-  geom_step(mapping = aes(x = valuation, y = bidder_1, group = 1), color="red", alpha = alpha_value, size = size_value) +
+  geom_step(mapping = aes(x = valuation, y = bidder_1, group = 1), color='red', alpha = alpha_value, size = size_value) +
   geom_step(mapping = aes(x = valuation, y = bidder_2, group = 2), color='blue', alpha = alpha_value, size = size_value) +
   geom_step(mapping = aes(x = valuation, y = bidder_3, group = 3), color='darkgreen',alpha = alpha_value, size = size_value) +
-  geom_line(mapping = aes(x = valuation, y = cont_bid, group = 4), linetype = "dashed") 
+  geom_line(mapping = aes(x = valuation, y = cont_bid, group = 4), linetype = "dashed") +
+  theme(text=element_text(size=10, family='Times New Roman'))
+
+  
   
