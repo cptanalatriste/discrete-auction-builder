@@ -7,3 +7,5 @@ __pycache__/gamebuilder.cpython-36.pyc
 *.pyc
 *.xml___jb_tmp___
 .Rproj.user
+equilibrium_plots/equilibrium_plots.Rproj
+equilibrium_plots/.Rhistory

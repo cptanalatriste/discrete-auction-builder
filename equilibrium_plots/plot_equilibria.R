@@ -22,6 +22,7 @@ temp <- rename(temp, bidder_3 = 4)
 
 alpha_value <- 0.5
 size_value <- 1.8
+font_size <- 15
 
 ggplot(data = temp) + 
   theme_bw() +
@@ -31,7 +32,14 @@ ggplot(data = temp) +
   geom_step(mapping = aes(x = valuation, y = bidder_2, group = 2), color='blue', alpha = alpha_value, size = size_value) +
   geom_step(mapping = aes(x = valuation, y = bidder_3, group = 3), color='darkgreen',alpha = alpha_value, size = size_value) +
   geom_line(mapping = aes(x = valuation, y = cont_bid, group = 4), linetype = "dashed") +
-  theme(text=element_text(size=10, family='Times New Roman'))
+  expand_limits(x = 0, y = 0) +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0)) +
+  theme(text=element_text(size=font_size, family='Times New Roman'),
+        panel.border = element_blank(),
+        panel.grid.major.x= element_blank(),
+        panel.grid.minor.x = element_blank(),
+        axis.line = element_line(size=.3, color="black"))
 
-  
+
   
