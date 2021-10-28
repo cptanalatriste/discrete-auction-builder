@@ -2,10 +2,13 @@ import logging
 import subprocess
 from string import Template
 
-# GAMBIT_DIR = "/Applications/Gambit.app/Contents/MacOS/"
-# GAMBIT_DIR = "C:\\Program Files (x86)\\Gambit\\"
-GAMBIT_DIR = "/home/carlos/gambit-15.1.1/"
 
+# TODO: Set a value according to your system
+GAMBIT_DIR = "/Applications/Gambit.app/Contents/MacOS/"
+# GAMBIT_DIR = "C:\\Program Files (x86)\\Gambit\\"
+# GAMBIT_DIR = "/home/user/gambit-15.1.1/"
+
+# These are the names of the solvers in Windows.
 # ALL_EQUILIBRIA = "gambit-enumpoly.exe"
 # PURE_EQUILIBRIA = "gambit-enumpure.exe"
 
